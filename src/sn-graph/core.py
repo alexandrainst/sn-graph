@@ -14,10 +14,6 @@ import time
 
 import numba as nb 
 
-import random
-
-
-
 def blur_and_threshold(image: np.ndarray, blur: bool=False, sigma: float=1, block_size: int=50, offset: float=0):
     im=image.copy()
 
