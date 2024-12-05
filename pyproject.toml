@@ -8,6 +8,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+numpy = "2.0"
+matplotlib = "^3.9.3"
+scikit-image = "^0.24.0"
+scikit-fmm = "^2024.9.16"
+numba = "^0.60.0"
 
 
 [build-system]
