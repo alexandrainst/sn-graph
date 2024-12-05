@@ -15,6 +15,10 @@ scikit-fmm = "^2024.9.16"
 numba = "^0.60.0"
 
 
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.1.1"
+ipykernel = "^6.29.5"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

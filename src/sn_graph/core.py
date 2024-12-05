@@ -1,31 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from skimage import io
-
-from skimage.filters import gaussian as gaussian_blur
-import numpy as np
-import skfmm
-from skimage.filters import threshold_local
 from numba import njit
-
 import time
-
-
-
 import numba as nb 
-
-def blur_and_threshold(image: np.ndarray, blur: bool=False, sigma: float=1, block_size: int=50, offset: float=0):
-    im=image.copy()
-
-    if blur:
-        im=gaussian_blur(im, sigma=sigma)
-
-    local_thresh = threshold_local(im, block_size, offset=offset)
-    binary_local = im > local_thresh
-
-    im=binary_local.astype(float)
-    return im
-
 
 # Sn graph functions
 
@@ -191,7 +167,6 @@ def timer(func):
         return wrapper
 
 
-
 # finally the function to create the graph out of a signed distance field array
 @timer
 def create_SN_graph(sdf_array:np.ndarray, num_vertices: int, edge_threshold: float, max_edge_length: int, minimal_radius:float=-1):
@@ -259,48 +234,48 @@ def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False
 
 
 
-if __name__=='__main__':
+# if __name__=='__main__':
 
 
 
     
-    show=True
-    # load image 
-    full_im=io.imread('./tests/leaf.jpeg')
-    print(full_im.shape)
-    im=full_im[:,:,0]
+#     show=True
+#     # load image 
+#     full_im=io.imread('./tests/leaf.jpeg')
+#     print(full_im.shape)
+#     im=full_im[:,:,0]
 
-    if show:
-        io.imshow(im)
+#     if show:
+#         io.imshow(im)
 
-    #process to get binary
-    #im=blur_and_threshold(im, blur=True, sigma=1, block_size=35, offset=0)
+#     #process to get binary
+#     #im=blur_and_threshold(im, blur=True, sigma=1, block_size=35, offset=0)
     
-    sdf = skfmm.distance(im, dx = 1)
+#     sdf = skfmm.distance(im, dx = 1)
    
     
 
 
 
 
-    spheres_centres, edges=create_SN_graph(sdf_array=sdf, num_vertices=300, edge_threshold=0.8, max_edge_length=200, minimal_radius=10)
+#     spheres_centres, edges=create_SN_graph(sdf_array=sdf, num_vertices=300, edge_threshold=0.8, max_edge_length=200, minimal_radius=10)
 
 
-    print(f"""
-    Nodes are the following:\n {spheres_centres}.\n  
-    Edges are the following:\n {edges}.\n 
-    The amount of nodes is: {len(spheres_centres)}.\n
-    The amount of edges is: {len(edges)}
-    """)
+#     print(f"""
+#     Nodes are the following:\n {spheres_centres}.\n  
+#     Edges are the following:\n {edges}.\n 
+#     The amount of nodes is: {len(spheres_centres)}.\n
+#     The amount of edges is: {len(edges)}
+#     """)
 
 
     
-    im=draw_graph_on_top_of_SDF(sdf, spheres_centres, edges)
+#     im=draw_graph_on_top_of_SDF(sdf, spheres_centres, edges)
 
     
-    if show:
-        plt.figure(figsize=(7,7))
-        io.imshow(im)
-        plt.show()
+#     if show:
+#         plt.figure(figsize=(7,7))
+#         io.imshow(im)
+#         plt.show()
     
    
