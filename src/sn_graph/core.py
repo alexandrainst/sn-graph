@@ -1,7 +1,8 @@
 import numpy as np
 from numba import njit
 import time
-import numba as nb 
+import numba as nb
+import skfmm
 
 # Sn graph functions
 
@@ -11,7 +12,7 @@ import numba as nb
 def euclid_dist( v_1,v_2):
     #print(f"v_1: {v_1}")
     #print(f"v_2: {v_2}")
-    return np.sqrt((v_1[0]-v_2[0])**2 +  (v_1[1]-v_2[1])**2)
+    return np.sqrt((v_1[0]-v_2[0])**2 + (v_1[1]-v_2[1])**2)
 
 @njit
 def SDF(v, sdf_array):
@@ -42,11 +43,11 @@ def update_candidates(sdf_array, candidates_array, new_centre):
     return
 
 @njit
-def remove_small_spheres_from_candidates(sdf_array, candidates_array, minimal_radius):
+def remove_small_spheres_from_candidates(sdf_array, candidates_array, minimal_sphere_radius):
     rows,columns=sdf_array.shape
     for row in range(rows):
         for column in range(columns):
-            if sdf_array[row,column] <minimal_radius:
+            if sdf_array[row,column] <minimal_sphere_radius:
                 candidates_array[row,column]=0
     return
     
@@ -63,12 +64,12 @@ def choose_next(sdf_array,sphere_centres,candidates):
     return candidates_with_values[0][1]
 
 @njit
-def choose_sphere_centres(sdf_array,num_vertices, minimal_radius):
+def choose_sphere_centres(sdf_array,max_num_vertices, minimal_sphere_radius):
     sphere_centres=[]
     candidates=sdf_array.copy()
 
-    if minimal_radius>0:
-        remove_small_spheres_from_candidates(sdf_array=sdf_array, candidates_array=candidates, minimal_radius=minimal_radius)
+    if minimal_sphere_radius>0:
+        remove_small_spheres_from_candidates(sdf_array=sdf_array, candidates_array=candidates, minimal_sphere_radius=minimal_sphere_radius)
 
    
     #find coordinates of the (first) maximal value in sdf_array (written in a numba-allowed way...)
@@ -80,7 +81,7 @@ def choose_sphere_centres(sdf_array,num_vertices, minimal_radius):
     sphere_centres.append(first_centre)
     update_candidates(sdf_array=sdf_array, candidates_array=candidates,new_centre=first_centre)
 
-    for _ in range(num_vertices-1):
+    for _ in range(max_num_vertices-1):
         #print(f"Added centre number: {i+1}")
         next_centre=choose_next(sdf_array, sphere_centres, candidates)
         if next_centre==(-1,-1):
@@ -115,7 +116,7 @@ def dist_line_point(v_0, line):
 
 
 @njit
-def determine_edges(spheres_centres: list, sdf_array:np.ndarray, threshold, max_dist):
+def determine_edges(spheres_centres: list, sdf_array:np.ndarray, edge_threshold, max_edge_length):
     
     print(f"The amount of spheres centres is {len(spheres_centres)}")
     possible_edges = [(a, b) for idx, a in enumerate(spheres_centres) for b in spheres_centres[idx + 1:]]
@@ -128,7 +129,7 @@ def determine_edges(spheres_centres: list, sdf_array:np.ndarray, threshold, max_
     possible_edges_2=[]
 
     for edge in possible_edges_1:
-        if euclid_dist(edge[0],edge[1])<max_dist:
+        if euclid_dist(edge[0],edge[1])<max_edge_length:
             possible_edges_2.append(edge)
     
     print(f"The amount of spheres centres is {len(spheres_centres)}")
@@ -145,9 +146,9 @@ def determine_edges(spheres_centres: list, sdf_array:np.ndarray, threshold, max_
     
         #print(f"Length of the goodpart is {good_part} and length og the pixels is {len(pixels)}")
 
-        if good_part>threshold*len(pixels):
+        if good_part>=edge_threshold*len(pixels):
             
-            close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]+2]
+            close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]]
         
             #print(f"Amount of close spheres is {len(close_spheres)}")
             # ther eis always two clsoe spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
@@ -169,11 +170,23 @@ def timer(func):
 
 # finally the function to create the graph out of a signed distance field array
 @timer
-def create_SN_graph(sdf_array:np.ndarray, num_vertices: int, edge_threshold: float, max_edge_length: int, minimal_radius:float=-1):
-    spheres_centres=choose_sphere_centres(sdf_array,num_vertices,minimal_radius)
+def create_SN_graph(
+    image: np.ndarray, 
+    max_num_vertices: int, 
+    max_edge_length: int, 
+    edge_threshold: float=1.0, 
+    minimal_sphere_radius: float=-1
+    ):
+
+    sdf_array = skfmm.distance(image, dx=1)
+    spheres_centres=choose_sphere_centres(sdf_array,max_num_vertices, minimal_sphere_radius)
     edges=determine_edges(spheres_centres,sdf_array,edge_threshold, max_edge_length)
 
     return spheres_centres, edges
+
+
+
+
 
 
 
