@@ -9,9 +9,7 @@ import skfmm
 #first functions to get vertices
 
 @njit
-def euclid_dist( v_1,v_2):
-    #print(f"v_1: {v_1}")
-    #print(f"v_2: {v_2}")
+def euclid_dist(v_1,v_2):
     return np.sqrt((v_1[0]-v_2[0])**2 + (v_1[1]-v_2[1])**2)
 
 @njit
@@ -51,25 +49,26 @@ def remove_small_spheres_from_candidates(sdf_array, candidates_array, minimal_sp
                 candidates_array[row,column]=0
     return
     
-
-
 @njit
-def choose_next(sdf_array,sphere_centres,candidates):
+def choose_next_sphere(sdf_array,sphere_centres,candidates):
     candidates=list(zip(*np.nonzero(candidates >0)))
     if not candidates:
-        print("Hallo")
         return (-1,-1)
     candidates_with_values= [(min([Dist(v_i, v_j,sdf_array) for v_i in sphere_centres]),v_j) for v_j in candidates]
     candidates_with_values.sort(key=lambda x: -x[0])
     return candidates_with_values[0][1]
 
 @njit
-def choose_sphere_centres(sdf_array,max_num_vertices, minimal_sphere_radius):
+def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
     sphere_centres=[]
     candidates=sdf_array.copy()
 
     if minimal_sphere_radius>0:
-        remove_small_spheres_from_candidates(sdf_array=sdf_array, candidates_array=candidates, minimal_sphere_radius=minimal_sphere_radius)
+        remove_small_spheres_from_candidates(
+            sdf_array=sdf_array, 
+            candidates_array=candidates, 
+            minimal_sphere_radius=minimal_sphere_radius
+            )
 
    
     #find coordinates of the (first) maximal value in sdf_array (written in a numba-allowed way...)
@@ -79,13 +78,12 @@ def choose_sphere_centres(sdf_array,max_num_vertices, minimal_sphere_radius):
     first_centre=(argmax_flat // c, argmax_flat % c)
    
     sphere_centres.append(first_centre)
-    update_candidates(sdf_array=sdf_array, candidates_array=candidates,new_centre=first_centre)
+    update_candidates(sdf_array=sdf_array, candidates_array=candidates, new_centre=first_centre)
 
     for _ in range(max_num_vertices-1):
         #print(f"Added centre number: {i+1}")
-        next_centre=choose_next(sdf_array, sphere_centres, candidates)
+        next_centre=choose_next_sphere(sdf_array, sphere_centres, candidates)
         if next_centre==(-1,-1):
-            print(f"Run out of candidates. Added {len(sphere_centres)} nodes.")
             break
         sphere_centres.append(next_centre)
         update_candidates(sdf_array, candidates,next_centre)
@@ -111,52 +109,32 @@ def bresenham(v,w):
 
 @njit
 def dist_line_point(v_0, line):
-
     return min([euclid_dist(v_0, v) for v in line])
+
+@njit
+def is_edge_good(edge, sdf_array, spheres_centres, edge_threshold):
+    pixels=bresenham(edge[0], edge[1])
+    good_part=0
+    for pixel in pixels:
+        if sdf_array[pixel[0], pixel[1]]>0:
+            good_part+=1
+
+    if good_part>=edge_threshold*len(pixels):
+        close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]]
+        
+        # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
+        if len(close_spheres)<=2:
+            return True
+    
+    return False
+
 
 
 @njit
 def determine_edges(spheres_centres: list, sdf_array:np.ndarray, edge_threshold, max_edge_length):
-    
-    print(f"The amount of spheres centres is {len(spheres_centres)}")
     possible_edges = [(a, b) for idx, a in enumerate(spheres_centres) for b in spheres_centres[idx + 1:]]
-    
-    possible_edges_1=[]
-    for edge in possible_edges:
-        if edge[0]!=edge[1]:
-            possible_edges_1.append(edge)
-    
-    possible_edges_2=[]
-
-    for edge in possible_edges_1:
-        if euclid_dist(edge[0],edge[1])<max_edge_length:
-            possible_edges_2.append(edge)
-    
-    print(f"The amount of spheres centres is {len(spheres_centres)}")
-    print(f"The amount of possible edges is {len(possible_edges_2)}")
-    actual_edges=[]
-    for edge in possible_edges_2:
-        pixels=bresenham(edge[0], edge[1])
-      
-       
-        good_part=0
-        for pixel in pixels:
-            if sdf_array[pixel[0], pixel[1]]>0:
-                good_part+=1
-    
-        #print(f"Length of the goodpart is {good_part} and length og the pixels is {len(pixels)}")
-
-        if good_part>=edge_threshold*len(pixels):
-            
-            close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]]
-        
-            #print(f"Amount of close spheres is {len(close_spheres)}")
-            # ther eis always two clsoe spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
-            if len(close_spheres)<=2:
-                actual_edges.append(edge)
-
-
-    return actual_edges
+    possible_edges = [edge for edge in possible_edges if edge[0] != edge[1] and euclid_dist(edge[0], edge[1]) < max_edge_length and is_edge_good(edge, sdf_array, spheres_centres, edge_threshold)]
+    return possible_edges
 
 def timer(func):
         def wrapper(*args, **kwargs):
@@ -183,11 +161,6 @@ def create_SN_graph(
     edges=determine_edges(spheres_centres,sdf_array,edge_threshold, max_edge_length)
 
     return spheres_centres, edges
-
-
-
-
-
 
 
 def sphere_coordinates(center, radius, shape, thickness=5):
@@ -243,52 +216,3 @@ def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False
 
 
 
-
-
-
-
-# if __name__=='__main__':
-
-
-
-    
-#     show=True
-#     # load image 
-#     full_im=io.imread('./tests/leaf.jpeg')
-#     print(full_im.shape)
-#     im=full_im[:,:,0]
-
-#     if show:
-#         io.imshow(im)
-
-#     #process to get binary
-#     #im=blur_and_threshold(im, blur=True, sigma=1, block_size=35, offset=0)
-    
-#     sdf = skfmm.distance(im, dx = 1)
-   
-    
-
-
-
-
-#     spheres_centres, edges=create_SN_graph(sdf_array=sdf, num_vertices=300, edge_threshold=0.8, max_edge_length=200, minimal_radius=10)
-
-
-#     print(f"""
-#     Nodes are the following:\n {spheres_centres}.\n  
-#     Edges are the following:\n {edges}.\n 
-#     The amount of nodes is: {len(spheres_centres)}.\n
-#     The amount of edges is: {len(edges)}
-#     """)
-
-
-    
-#     im=draw_graph_on_top_of_SDF(sdf, spheres_centres, edges)
-
-    
-#     if show:
-#         plt.figure(figsize=(7,7))
-#         io.imshow(im)
-#         plt.show()
-    
-   
