@@ -94,7 +94,8 @@ def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
 # now functions to get edges
 
 @njit
-def bresenham(v,w):
+def line_pixels(v,w):
+    """Bresenham's line algorithm"""
     x0,y0=v
     x1,y1=w
     pixels=set()
@@ -113,14 +114,14 @@ def dist_line_point(v_0, line):
 
 @njit
 def is_edge_good(edge, sdf_array, spheres_centres, edge_threshold):
-    pixels=bresenham(edge[0], edge[1])
+    pixels=line_pixels(edge[0], edge[1])
     good_part=0
     for pixel in pixels:
         if sdf_array[pixel[0], pixel[1]]>0:
             good_part+=1
 
     if good_part>=edge_threshold*len(pixels):
-        close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]]
+        close_spheres=[centre for centre in spheres_centres if dist_line_point(centre, pixels)<sdf_array[centre]-2]
         
         # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
         if len(close_spheres)<=2:
@@ -178,7 +179,7 @@ def sphere_coordinates(center, radius, shape, thickness=5):
 
 def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False):
 
-    image=sdf_array.copy()
+    image=0.1*(sdf_array.copy()>0)
     
     max_intensity=np.amax(image)
 
@@ -189,7 +190,7 @@ def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False
     for edge in edges:
     
         #a,b=sdf_array.shape
-        pixels =bresenham(edge[0], edge[1])
+        pixels =line_pixels(edge[0], edge[1])
         #pixels=list(filter(lambda pixel :pixel[0] in range(a) and pixel[1] in range(b) ,pixels ))
         #good_part= len(list(filter(lambda pixel: sd2[pixel[0], pixel[1]]>0, pixels)))
             
