@@ -6,7 +6,7 @@ A Python implementation of an SN-Graph skeletonisation algorithm. Based on the a
 
 SN-Graph works by:
 
-1. Creating vertices as centres of spheres inscribed in the image, where one balances the sie of the spheres with their coverage of the shape.
+1. Creating vertices as centres of spheres inscribed in the image, where one balances the size of the spheres with their coverage of the shape, and pariwise distances from one another.
 3. Adding edges between the neighbouring spheres, subject to a few common-sense criteria.
 
 The resulting graph serves as a lightweight 1-dimensional representation of the original image, potentially useful for further analysis. 
