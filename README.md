@@ -2,6 +2,9 @@
 
 A Python implementation of an SN-Graph skeletonisation algorithm. Based on the article *SN-Graph: a Minimalist 3D Object Representation for Classification* [arXiv:2105.14784](https://arxiv.org/abs/2105.14784). Currently works only for 2D images.
 
+
+![Example of a binary image and the skeletal graph](/tests/example.png "SN-graph generated out of an image of a leave.")
+
 ## Description
 
 SN-Graph works by:
