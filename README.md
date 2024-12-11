@@ -37,10 +37,5 @@ centers, edges = sn.create_SN_graph(
 - `edge_threshold`: Threshold for determining what portion of an edge must be contained within the shape
 - `minimal_sphere_radius`: Minimum radius allowed for spheres
 
-## License
-
-MIT License
-
-
 ## Authors
 - Tomasz Prytuła (<tomasz.prytula@alexandra.dk>)
