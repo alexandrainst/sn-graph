@@ -4,6 +4,7 @@ import time
 import numba as nb
 import skfmm
 from typing import Tuple, List
+import warnings
 
 # Sn graph functions
 
@@ -168,7 +169,7 @@ def create_SN_graph(
     max_num_vertices: int = -1,
     max_edge_length: int = -1,
     edge_threshold: float = 1.0,
-    minimal_sphere_radius: float = -1
+    minimal_sphere_radius: float = 5
 ) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]:
     """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
     
@@ -220,8 +221,13 @@ def create_SN_graph(
     >>> img[40:60, 40:60] = 1  # Create a square
     >>> centers, edges = create_SN_graph(img, max_num_vertices=10)
     """
-
-
+    if minimal_sphere_radius<5:
+       
+        warnings.warn(
+            f"Small minimal_sphere_radius ({minimal_sphere_radius}) detected. Low values may significantly "
+            f"increase runtime. Recommended value: >= 5",
+            RuntimeWarning
+)
     sdf_array = skfmm.distance(image, dx=1)
     spheres_centres=choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius)
     edges=determine_edges(spheres_centres, sdf_array, edge_threshold, max_edge_length)
