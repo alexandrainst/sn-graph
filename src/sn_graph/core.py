@@ -71,8 +71,6 @@ def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
             candidates_array=candidates, 
             minimal_sphere_radius=minimal_sphere_radius
             )
-
-   
     #find coordinates of the (first) maximal value in sdf_array (written in a numba-allowed way...)
     
     argmax_flat=np.argmax(sdf_array)
@@ -92,14 +90,6 @@ def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
         sphere_centres.append(next_centre)
         update_candidates(sdf_array, candidates,next_centre)
         i+=1
-
-    # for _ in range(max_num_vertices-1):
-    #     #print(f"Added centre number: {i+1}")
-    #     next_centre=choose_next_sphere(sdf_array, sphere_centres, candidates)
-    #     if next_centre==(-1,-1):
-    #         break
-    #     sphere_centres.append(next_centre)
-    #     update_candidates(sdf_array, candidates,next_centre)
 
     sphere_centres=nb.typed.List(sphere_centres)
     return sphere_centres
