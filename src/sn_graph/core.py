@@ -1,8 +1,10 @@
 import numpy as np
 
 import skfmm
+from skimage.draw import line
 from typing import Tuple, Union, Any
 import warnings
+from itertools import combinations
 
 
 # first functions to get vertices
@@ -113,21 +115,6 @@ def choose_sphere_centres(
 # now functions to get edges
 
 
-def line_pixels(v: Tuple[int, int], w: Tuple[int, int]) -> list:
-    """Bresenham's line algorithm"""
-    x0, y0 = v
-    x1, y1 = w
-    pixels = set()
-    length = euclid_dist(v, w)
-    for i in range(0, int(np.ceil(length) + 1)):
-        weight1 = i / length
-        weight2 = (length - i) / length
-        x = weight1 * x0 + weight2 * x1
-        y = weight1 * y0 + weight2 * y1
-        pixels.add((int(np.floor(x)), int(np.floor(y))))
-    return list(pixels)
-
-
 def point_interval_distance(
     point: Tuple[int, int],
     interval_start: Tuple[int, int],
@@ -158,7 +145,7 @@ def point_interval_distance(
     t = np.dot(p - a, ba) / ba_length
 
     if t <= 0:
-        return float(p.linalg.norm(p - a))
+        return float(np.linalg.norm(p - a))
     elif t >= ba_length:
         return float(np.linalg.norm(p - b))
     else:
@@ -167,42 +154,45 @@ def point_interval_distance(
         return float(np.linalg.norm(p - h))
 
 
-def is_edge_good(
-    edge: tuple,
-    sdf_array: np.ndarray,
-    spheres_centres: list,
-    edge_threshold: float,
+def edge_is_mostly_within_object(
+    edge: tuple, edge_treshold: float, sdf_array: np.ndarray
 ) -> bool:
-    """Check if a sufficient portion of the edge lies within the object. If so, check if there are no more than two spheres too close to the edge.
+    """Check if a sufficient portion of the edge lies within the object.
 
     Arguments:
         edge -- tuple of two tuples, each representing a vertex
+        edge_treshold -- threshold value for how much of edge has to be qithin the
         sdf_array -- signed distance field array
-        spheres_centres -- list of sphere centers
-        edge_threshold -- float value for how much egde should lie within the object
 
     Returns:
-        bool -- True if edge is good, False otherwise
+        bool -- True if edge is mostly within the object, False otherwise
     """
+    pixel_indices = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
+    good_part = (sdf_array[pixel_indices] > 0).sum()
+    amount_of_pixels = len(pixel_indices[0])
+    return bool(good_part >= edge_treshold * amount_of_pixels)
 
-    pixels = line_pixels(edge[0], edge[1])
-    good_part = 0
-    for pixel in pixels:
-        if sdf_array[pixel[0], pixel[1]] > 0:
-            good_part += 1
 
-    if good_part >= edge_threshold * len(pixels):
-        close_spheres = [
-            centre
-            for centre in spheres_centres
-            # if dist_line_point(centre, pixels) < sdf_array[centre] - 2
-            if point_interval_distance(centre, edge[0], edge[1]) < sdf_array[centre] - 2
-        ]
+def edge_is_close_to_many_spheres(
+    edge: tuple, spheres_centres: list, sdf_array: np.ndarray
+) -> bool:
+    """Check if there are no more than two spheres too close to the edge.
 
-        # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
-        if len(close_spheres) <= 2:
+    Arguments:
+        edge -- tuple of two tuples, each representing a vertex
+        spheres_centres -- list of sphere centers
+        sdf_array -- signed distance field array
+
+    Returns:
+        bool -- True if there are no more than two spheres too close to the edge, False otherwise
+    """
+    close_spheres_count = 0
+    for centre in spheres_centres:
+        if point_interval_distance(centre, edge[0], edge[1]) < sdf_array[centre] - 2:
+            close_spheres_count += 1
+        # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close.
+        if close_spheres_count > 2:
             return True
-
     return False
 
 
@@ -212,21 +202,17 @@ def determine_edges(
     edge_threshold: float,
     max_edge_length: int,
 ) -> list:
-    print("Determining edges: get possible edges...")
-    possible_edges = [
-        (a, b)
-        for idx, a in enumerate(spheres_centres)
-        for b in spheres_centres[idx + 1 :]
-    ]
     if max_edge_length == -1:
         max_edge_length = np.inf
-    print("Determining edges: filter edges...")
+
+    possible_edges = list(combinations(spheres_centres, 2))
     actual_edges = [
         edge
         for edge in possible_edges
         if edge[0] != edge[1]
         and euclid_dist(edge[0], edge[1]) < max_edge_length
-        and is_edge_good(edge, sdf_array, spheres_centres, edge_threshold)
+        and edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
+        and not edge_is_close_to_many_spheres(edge, spheres_centres, sdf_array)
     ]
 
     return actual_edges

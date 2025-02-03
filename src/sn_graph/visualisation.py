@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple
 
-from .core import line_pixels
+from skimage.draw import line
 
 ## Extra function for visualisation
 
@@ -34,10 +34,8 @@ def draw_graph_on_top_of_SDF(
         max_intensity = 10
 
     for edge in edges:
-        pixels = line_pixels(edge[0], edge[1])
-
-        for pixel in pixels:
-            image[pixel[0], pixel[1]] = 2 * max_intensity
+        pixels = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
+        image[pixels] = 2 * max_intensity
 
     for center in spheres_centres:
         image[center] = 4 * max_intensity
