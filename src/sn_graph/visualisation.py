@@ -1,11 +1,14 @@
 import numpy as np
+from typing import Tuple
 
 from .core import line_pixels
 
 ## Extra function for visualisation
 
 
-def sphere_coordinates(center, radius, shape, thickness=5):
+def sphere_coordinates(
+    center: Tuple[int, int], radius: float, shape: tuple, thickness: int = 5
+) -> list:
     """
     Generate coordinates of a sphere surface (circle in 2D) given its center and radius.
     """
@@ -19,7 +22,9 @@ def sphere_coordinates(center, radius, shape, thickness=5):
     return list(zip(coords[0], coords[1]))
 
 
-def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False):
+def draw_graph_on_top_of_SDF(
+    sdf_array: np.ndarray, spheres_centres: list, edges: list, remove_SDF: bool = False
+) -> np.ndarray:
     image = 0.1 * (sdf_array.copy() > 0)
 
     max_intensity = np.amax(image)

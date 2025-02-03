@@ -12,7 +12,7 @@ SN-Graph works by:
 1. Creating vertices as centres of spheres inscribed in the image, where one balances the size of the spheres with their coverage of the shape, and pariwise distances from one another.
 3. Adding edges between the neighbouring spheres, subject to a few common-sense criteria.
 
-The resulting graph serves as a lightweight 1-dimensional representation of the original image, potentially useful for further analysis. 
+The resulting graph serves as a lightweight 1-dimensional representation of the original image, potentially useful for further analysis.
 
 ## Basic Usage
 
@@ -26,7 +26,7 @@ img[40:60, 40:60] = 1  # Create a square region
 
 # Generate the SN graph
 centers, edges = sn.create_SN_graph(
-    img, 
+    img,
     max_num_vertices=10,
     edge_threshold=1.0
 )

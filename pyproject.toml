@@ -12,7 +12,6 @@ numpy = "2.0"
 matplotlib = "^3.9.3"
 scikit-image = "^0.24.0"
 scikit-fmm = "^2024.9.16"
-numba = "^0.60.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -46,7 +45,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 disallow_untyped_decorators = true
-no_implicit_optional = true
+no_implicit_optional =true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = true

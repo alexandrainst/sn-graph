@@ -1,35 +1,29 @@
 import numpy as np
-from numba import njit
-import time
-import numba as nb
+
 import skfmm
-from typing import Tuple, List
+from typing import Tuple, Union, Any
 import warnings
 
-# Sn graph functions
 
 # first functions to get vertices
 
 
-@njit
-def euclid_dist(v_1, v_2):
-    return np.sqrt((v_1[0] - v_2[0]) ** 2 + (v_1[1] - v_2[1]) ** 2)
+def euclid_dist(v_1: Tuple[int, int], v_2: Tuple[int, int]) -> float:
+    return float(np.sqrt((v_1[0] - v_2[0]) ** 2 + (v_1[1] - v_2[1]) ** 2))
 
 
-@njit
-def SDF(v, sdf_array):
-    return sdf_array[v[0], v[1]]
+def SDF(v: Tuple[int, int], sdf_array: np.ndarray) -> float:
+    return float(sdf_array[v[0], v[1]])
 
 
-@njit
-def Dist(v_i, v_j, sdf_array):
+def Dist(v_i: Tuple[int, int], v_j: Tuple[int, int], sdf_array: np.ndarray) -> float:
     """SN-Graph paper distance between two vertices"""
-    return euclid_dist(v_i, v_j) - SDF(v_i, sdf_array) + 2 * SDF(v_j, sdf_array)
+    return float(euclid_dist(v_i, v_j) - SDF(v_i, sdf_array) + 2 * SDF(v_j, sdf_array))
 
 
-@njit
-def ball_coordinates(centre, radius):
+def ball_coordinates(centre: Tuple[int, int], radius: float) -> list:
     """Determine the coordinates of the pixels in a ball of given radius around a given centre."""
+    radius = int(np.ceil(radius))
     coordinates = []
     coordinates.append(centre)
     for i in range(-radius, radius):
@@ -40,17 +34,17 @@ def ball_coordinates(centre, radius):
     return coordinates
 
 
-@njit
-def update_candidates(sdf_array, candidates_array, new_centre):
+def update_candidates(
+    sdf_array: np.ndarray, candidates_array: np.ndarray, new_centre: Tuple[int, int]
+) -> None:
     for coordinates in ball_coordinates(new_centre, sdf_array[new_centre]):
         candidates_array[coordinates] = 0
     return
 
 
-@njit
 def remove_small_spheres_from_candidates(
-    sdf_array, candidates_array, minimal_sphere_radius
-):
+    sdf_array: np.ndarray, candidates_array: np.ndarray, minimal_sphere_radius: float
+) -> None:
     """Remove small spheres from the candidates array based on a minimal radius.
 
     Arguments:
@@ -67,11 +61,12 @@ def remove_small_spheres_from_candidates(
     return
 
 
-@njit
-def choose_next_sphere(sdf_array, sphere_centres, candidates):
+def choose_next_sphere(
+    sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
+) -> Union[Any, Tuple[int, int]]:
     candidates = list(zip(*np.nonzero(candidates > 0)))
     if not candidates:
-        return (-1, -1)
+        return None
     candidates_with_values = [
         (min([Dist(v_i, v_j, sdf_array) for v_i in sphere_centres]), v_j)
         for v_j in candidates
@@ -80,8 +75,9 @@ def choose_next_sphere(sdf_array, sphere_centres, candidates):
     return candidates_with_values[0][1]
 
 
-@njit
-def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
+def choose_sphere_centres(
+    sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
+) -> list:
     sphere_centres = []
     candidates = sdf_array.copy()
 
@@ -107,25 +103,26 @@ def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
         if i == max_num_vertices:
             break
         next_centre = choose_next_sphere(sdf_array, sphere_centres, candidates)
-        if next_centre == (-1, -1):
+        if not next_centre:
             break
         sphere_centres.append(next_centre)
         update_candidates(sdf_array, candidates, next_centre)
         i += 1
 
-    sphere_centres = nb.typed.List(sphere_centres)
+    sphere_centres
     return sphere_centres
 
 
 # now functions to get edges
-@njit
-def line_pixels(v, w):
+
+
+def line_pixels(v: Tuple[int, int], w: Tuple[int, int]) -> list:
     """Bresenham's line algorithm"""
     x0, y0 = v
     x1, y1 = w
     pixels = set()
     length = euclid_dist(v, w)
-    for i in range(0, np.ceil(length) + 1):
+    for i in range(0, int(np.ceil(length) + 1)):
         weight1 = i / length
         weight2 = (length - i) / length
         x = weight1 * x0 + weight2 * x1
@@ -134,13 +131,16 @@ def line_pixels(v, w):
     return list(pixels)
 
 
-@njit
-def dist_line_point(v_0, line):
+def dist_line_point(v_0: Tuple[int, int], line: list) -> float:
     return min([euclid_dist(v_0, v) for v in line])
 
 
-@njit
-def is_edge_good(edge, sdf_array, spheres_centres, edge_threshold):
+def is_edge_good(
+    edge: tuple,
+    sdf_array: np.ndarray,
+    spheres_centres: list,
+    edge_threshold: float,
+) -> bool:
     """Check if a sufficient portion of the edge lies within the object. If so, check if there are no more than two spheres too close to the edge.
 
     Arguments:
@@ -172,10 +172,12 @@ def is_edge_good(edge, sdf_array, spheres_centres, edge_threshold):
     return False
 
 
-@njit
 def determine_edges(
-    spheres_centres: list, sdf_array: np.ndarray, edge_threshold, max_edge_length
-):
+    spheres_centres: list,
+    sdf_array: np.ndarray,
+    edge_threshold: float,
+    max_edge_length: int,
+) -> list:
     possible_edges = [
         (a, b)
         for idx, a in enumerate(spheres_centres)
@@ -193,19 +195,9 @@ def determine_edges(
     return actual_edges
 
 
-def timer(func):
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        print(f"{func.__name__} took {end - start:.6f} seconds")
-        return result
-
-    return wrapper
-
-
 # finally the function to create the graph out of a signed distance field array
-@timer
+
+
 def create_SN_graph(
     image: np.ndarray,
     max_num_vertices: int = -1,
@@ -213,7 +205,7 @@ def create_SN_graph(
     edge_threshold: float = 1.0,
     minimal_sphere_radius: float = 5,
     return_sdf: bool = False,
-) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]:
+) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
     """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
 
     This function converts a binary image into a graph representation by first computing
