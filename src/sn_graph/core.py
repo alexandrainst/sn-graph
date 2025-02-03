@@ -230,7 +230,8 @@ def create_SN_graph(
     >>> img[40:60, 40:60] = 1  # Create a square
     >>> centers, edges = create_SN_graph(img, max_num_vertices=10)
     """
-    assert image.ndim == 2, f"Input image must be 2D, received shape {image.shape}"
+    image=np.squeeze(image)
+    assert image.ndim == 2, f"Input image must be 2D, received shape {image.shape} (after squeezing)."
 
 
     if minimal_sphere_radius<5:
