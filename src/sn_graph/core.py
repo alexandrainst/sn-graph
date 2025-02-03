@@ -52,12 +52,7 @@ def remove_small_spheres_from_candidates(
         candidates_array -- array of candidate sphere centers (non zero values are candidates)
         minimal_sphere_radius -- minimal radius allowed for spheres
     """
-
-    rows, columns = sdf_array.shape
-    for row in range(rows):
-        for column in range(columns):
-            if sdf_array[row, column] < minimal_sphere_radius:
-                candidates_array[row, column] = 0
+    candidates_array[sdf_array < minimal_sphere_radius] = 0
     return
 
 
@@ -72,6 +67,7 @@ def choose_next_sphere(
         for v_j in candidates
     ]
     candidates_with_values.sort(key=lambda x: -x[0])
+
     return candidates_with_values[0][1]
 
 
@@ -110,6 +106,7 @@ def choose_sphere_centres(
         i += 1
 
     sphere_centres
+
     return sphere_centres
 
 
@@ -269,10 +266,13 @@ def create_SN_graph(
             f"increase runtime. Recommended value: >= 5",
             RuntimeWarning,
         )
+    print("Computing SDF array...")
     sdf_array = skfmm.distance(image, dx=1)
+    print("Computing sphere centres...")
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
+    print("Computing edges...")
     edges = determine_edges(spheres_centres, sdf_array, edge_threshold, max_edge_length)
 
     if return_sdf:
