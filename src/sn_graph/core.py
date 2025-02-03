@@ -128,8 +128,43 @@ def line_pixels(v: Tuple[int, int], w: Tuple[int, int]) -> list:
     return list(pixels)
 
 
-def dist_line_point(v_0: Tuple[int, int], line: list) -> float:
-    return min([euclid_dist(v_0, v) for v in line])
+def point_interval_distance(
+    point: Tuple[int, int],
+    interval_start: Tuple[int, int],
+    interval_end: Tuple[int, int],
+) -> float:
+    """Calculate the distance between a point and an interval.
+    Arguments:
+        point -- point coordinates
+        interval_start -- interval start coordinates
+        interval_end -- interval end coordinates
+    Returns:
+        float -- distance between point and interval
+    """
+    # Convert to numpy arrays
+    p = np.asarray(point)
+    a = np.asarray(interval_start)
+    b = np.asarray(interval_end)
+
+    # Get vector b-a and its length
+    ba = b - a
+    ba_length = np.linalg.norm(ba)
+
+    # If interval is degenerate (a=b), return distance to point a
+    if ba_length < 1e-10:
+        return float(np.linalg.norm(p - a))
+
+    # Calculate projection length t = (p-a)·(b-a)/|b-a|
+    t = np.dot(p - a, ba) / ba_length
+
+    if t <= 0:
+        return float(p.linalg.norm(p - a))
+    elif t >= ba_length:
+        return float(np.linalg.norm(p - b))
+    else:
+        # Project onto line: h = a + t*(b-a)/|b-a|
+        h = a + t * (ba / ba_length)
+        return float(np.linalg.norm(p - h))
 
 
 def is_edge_good(
@@ -149,6 +184,7 @@ def is_edge_good(
     Returns:
         bool -- True if edge is good, False otherwise
     """
+
     pixels = line_pixels(edge[0], edge[1])
     good_part = 0
     for pixel in pixels:
@@ -159,7 +195,8 @@ def is_edge_good(
         close_spheres = [
             centre
             for centre in spheres_centres
-            if dist_line_point(centre, pixels) < sdf_array[centre] - 2
+            # if dist_line_point(centre, pixels) < sdf_array[centre] - 2
+            if point_interval_distance(centre, edge[0], edge[1]) < sdf_array[centre] - 2
         ]
 
         # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close!
@@ -175,6 +212,7 @@ def determine_edges(
     edge_threshold: float,
     max_edge_length: int,
 ) -> list:
+    print("Determining edges: get possible edges...")
     possible_edges = [
         (a, b)
         for idx, a in enumerate(spheres_centres)
@@ -182,6 +220,7 @@ def determine_edges(
     ]
     if max_edge_length == -1:
         max_edge_length = np.inf
+    print("Determining edges: filter edges...")
     actual_edges = [
         edge
         for edge in possible_edges
@@ -189,6 +228,7 @@ def determine_edges(
         and euclid_dist(edge[0], edge[1]) < max_edge_length
         and is_edge_good(edge, sdf_array, spheres_centres, edge_threshold)
     ]
+
     return actual_edges
 
 
