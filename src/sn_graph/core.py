@@ -44,6 +44,14 @@ def update_candidates(sdf_array, candidates_array, new_centre):
 
 @njit
 def remove_small_spheres_from_candidates(sdf_array, candidates_array, minimal_sphere_radius):
+    """Remove small spheres from the candidates array based on a minimal radius.
+    
+    Arguments:
+        sdf_array -- signed distance field array
+        candidates_array -- array of candidate sphere centers (non zero values are candidates)
+        minimal_sphere_radius -- minimal radius allowed for spheres
+    """
+    
     rows,columns=sdf_array.shape
     for row in range(rows):
         for column in range(columns):
@@ -117,6 +125,17 @@ def dist_line_point(v_0, line):
 
 @njit
 def is_edge_good(edge, sdf_array, spheres_centres, edge_threshold):
+    """Check if a sufficient portion of the edge lies within the object. If so, check if there are no more than two spheres too close to the edge.
+    
+    Arguments:
+        edge -- tuple of two tuples, each representing a vertex
+        sdf_array -- signed distance field array
+        spheres_centres -- list of sphere centers
+        edge_threshold -- float value for how much egde should lie within the object   
+
+    Returns:
+        bool -- True if edge is good, False otherwise
+    """
     pixels=line_pixels(edge[0], edge[1])
     good_part=0
     for pixel in pixels:
@@ -211,6 +230,9 @@ def create_SN_graph(
     >>> img[40:60, 40:60] = 1  # Create a square
     >>> centers, edges = create_SN_graph(img, max_num_vertices=10)
     """
+    assert image.ndim == 2, f"Input image must be 2D, received shape {image.shape}"
+
+
     if minimal_sphere_radius<5:
        
         warnings.warn(
@@ -223,6 +245,13 @@ def create_SN_graph(
     edges=determine_edges(spheres_centres, sdf_array, edge_threshold, max_edge_length)
  
     return spheres_centres, edges
+
+
+
+
+
+
+## Extra function for visualisation
 
 
 def sphere_coordinates(center, radius, shape, thickness=5):
