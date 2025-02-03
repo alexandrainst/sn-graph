@@ -103,7 +103,6 @@ def choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius):
     return sphere_centres
 
 # now functions to get edges
-
 @njit
 def line_pixels(v,w):
     """Bresenham's line algorithm"""
@@ -118,6 +117,7 @@ def line_pixels(v,w):
         y=weight1*y0+ weight2*y1
         pixels.add((int(np.floor(x)), int(np.floor(y))))
     return list(pixels)
+
 
 @njit
 def dist_line_point(v_0, line):
@@ -178,7 +178,8 @@ def create_SN_graph(
     max_num_vertices: int = -1,
     max_edge_length: int = -1,
     edge_threshold: float = 1.0,
-    minimal_sphere_radius: float = 5
+    minimal_sphere_radius: float = 5,
+    return_sdf: bool = False,
 ) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]:
     """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
     
@@ -203,6 +204,8 @@ def create_SN_graph(
     minimal_sphere_radius : float, optional
         Minimum radius allowed for spheres when placing vertices.
         If -1, no minimum is enforced. Default is -1.
+    return_sdf : bool, optional 
+        If True, the signed distance field array is returned as well.
         TODO: implement default behavior for minimal_sphere_radius
         
     Returns
@@ -244,70 +247,10 @@ def create_SN_graph(
     sdf_array = skfmm.distance(image, dx=1)
     spheres_centres=choose_sphere_centres(sdf_array, max_num_vertices, minimal_sphere_radius)
     edges=determine_edges(spheres_centres, sdf_array, edge_threshold, max_edge_length)
- 
+    
+    if return_sdf:
+        return spheres_centres, edges, sdf_array
     return spheres_centres, edges
-
-
-
-
-
-
-## Extra function for visualisation
-
-
-def sphere_coordinates(center, radius, shape, thickness=5):
-    """
-    Generate coordinates of a sphere surface (circle in 2D) given its center and radius.
-    """
-    y, x = np.ogrid[:shape[0], :shape[1]]
-    dist_squared = (x - center[1])**2 + (y - center[0])**2
-    
-    # Create a mask for points close to the sphere surface
-    mask = np.abs(dist_squared - radius**2) <= thickness**2
-    
-    coords = np.where(mask)
-    return list(zip(coords[0], coords[1]))
-
-
-
-
-def draw_graph_on_top_of_SDF(sdf_array, spheres_centres, edges, remove_SDF=False):
-
-    image=0.1*(sdf_array.copy()>0)
-    
-    max_intensity=np.amax(image)
-
-    if remove_SDF:
-        image=np.zeros(image.shape)
-        max_intensity=10
-
-    for edge in edges:
-    
-        #a,b=sdf_array.shape
-        pixels =line_pixels(edge[0], edge[1])
-        #pixels=list(filter(lambda pixel :pixel[0] in range(a) and pixel[1] in range(b) ,pixels ))
-        #good_part= len(list(filter(lambda pixel: sd2[pixel[0], pixel[1]]>0, pixels)))
-            
-        for pixel in pixels:
-            # if sd2[pixel[0],pixel[1]]==0:
-            #     add=0
-            # else:
-            #     add=500
-
-      
-            image[pixel[0], pixel[1]]=2*max_intensity
-
-    for center in spheres_centres:
-        image[center]=4*max_intensity 
-        radius = sdf_array[center]  # Use SDF value as radius
-        sphere_coords = sphere_coordinates(center, radius, image.shape)
-        for coord in sphere_coords:
-            if 0 <= coord[0] < image.shape[0] and 0 <= coord[1] < image.shape[1]:
-                image[coord[0], coord[1]] = 4 * max_intensity
-
-
-
-    return image   
 
 
 
