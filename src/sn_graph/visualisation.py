@@ -14,6 +14,10 @@ def draw_graph_on_image(
         img[pixels] = 2
 
     for center in spheres_centres:
-        img[circle_perimeter(center[0], center[1], int(np.ceil(sdf_array[center])))] = 4
+        img[
+            circle_perimeter(
+                center[0], center[1], int(np.ceil(sdf_array[center])), shape=img.shape
+            )
+        ] = 4
 
     return img
