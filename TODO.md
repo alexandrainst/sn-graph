@@ -1,4 +1,5 @@
 ## TODO:
+- it seems to work for any one channel image, where 0 is the background, not necessarily binary! Either force it as prepocessing of arguments, or adjust visualisation functions
 - make it not stall if defaults are set to 0 (find out why it stalls)
 - it doesn't add some obvious edges, find out why, and make them add (the edge to tip spheres): could it be that it is because we remove some stuff from sdf on the fly, so then the edges do not pass the criterion? No, now  I think it is because sphere overlap too much, so the big sphere can cover middle of a smaller sphere. That must be an issue with the distance itself. Maybe one can make a weight paramater there to steer it?
 - makes overlap between spheres too big, is it a property of the distance or what? can it be changed? Same answer as above!
