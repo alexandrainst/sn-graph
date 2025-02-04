@@ -1,5 +1,4 @@
 import numpy as np
-
 import skfmm
 from skimage.draw import line, disk
 from typing import Tuple, Union, Any
@@ -14,13 +13,15 @@ def euclid_dist(v_1: Tuple[int, int], v_2: Tuple[int, int]) -> float:
     return float(np.sqrt((v_1[0] - v_2[0]) ** 2 + (v_1[1] - v_2[1]) ** 2))
 
 
-def SDF(v: Tuple[int, int], sdf_array: np.ndarray) -> float:
-    return float(sdf_array[v[0], v[1]])
-
-
-def Dist(v_i: Tuple[int, int], v_j: Tuple[int, int], sdf_array: np.ndarray) -> float:
+def sn_graph_distance(
+    v_i: Tuple[int, int], v_j: Tuple[int, int], sdf_array: np.ndarray
+) -> float:
     """SN-Graph paper distance between two vertices"""
-    return float(euclid_dist(v_i, v_j) - SDF(v_i, sdf_array) + 2 * SDF(v_j, sdf_array))
+    return float(
+        euclid_dist(v_i, v_j)
+        - sdf_array[v_i[0], v_i[1]]
+        + 2 * sdf_array[v_j[0], v_j[1]]
+    )
 
 
 def update_candidates(
@@ -53,7 +54,7 @@ def choose_next_sphere(
     if not candidates:
         return None
     candidates_with_values = [
-        (min([Dist(v_i, v_j, sdf_array) for v_i in sphere_centres]), v_j)
+        (min([sn_graph_distance(v_i, v_j, sdf_array) for v_i in sphere_centres]), v_j)
         for v_j in candidates
     ]
     candidates_with_values.sort(key=lambda x: -x[0])
@@ -94,8 +95,6 @@ def choose_sphere_centres(
         sphere_centres.append(next_centre)
         update_candidates(sdf_array, candidates, next_centre)
         i += 1
-
-    sphere_centres
 
     return sphere_centres
 
