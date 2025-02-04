@@ -1,7 +1,7 @@
 import numpy as np
 
 import skfmm
-from skimage.draw import line
+from skimage.draw import line, disk
 from typing import Tuple, Union, Any
 import warnings
 from itertools import combinations
@@ -23,24 +23,12 @@ def Dist(v_i: Tuple[int, int], v_j: Tuple[int, int], sdf_array: np.ndarray) -> f
     return float(euclid_dist(v_i, v_j) - SDF(v_i, sdf_array) + 2 * SDF(v_j, sdf_array))
 
 
-def ball_coordinates(centre: Tuple[int, int], radius: float) -> list:
-    """Determine the coordinates of the pixels in a ball of given radius around a given centre."""
-    radius = int(np.ceil(radius))
-    coordinates = []
-    coordinates.append(centre)
-    for i in range(-radius, radius):
-        for j in range(-radius, radius):
-            if euclid_dist(centre, (centre[0] + i, centre[1] + j)) <= radius:
-                coordinates.append((centre[0] + i, centre[1] + j))
-
-    return coordinates
-
-
 def update_candidates(
     sdf_array: np.ndarray, candidates_array: np.ndarray, new_centre: Tuple[int, int]
 ) -> None:
-    for coordinates in ball_coordinates(new_centre, sdf_array[new_centre]):
-        candidates_array[coordinates] = 0
+    """Update the candidates array after placing a new sphere center."""
+
+    candidates_array[disk(new_centre, sdf_array[new_centre], shape=sdf_array.shape)] = 0
     return
 
 
