@@ -98,7 +98,6 @@ def choose_sphere_centres(
         if i == max_num_vertices:
             break
         next_centre = choose_next_sphere(sdf_array, sphere_centres, candidates)
-        print(f"Added a new sphere{next_centre} of radius{sdf_array[next_centre]}")
         if not next_centre:
             break
         sphere_centres.append(next_centre)
