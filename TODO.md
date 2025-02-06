@@ -10,3 +10,4 @@
 - add more examples
 - Implement the 3D version!
 - Maybe allow to adjust the sn_graph distance, so users can choose between sparser and denser spheres!
+- Tests are not run as a part of a pre-commit hook.
