@@ -65,9 +65,12 @@ def choose_next_sphere(
 def choose_sphere_centres(
     sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
 ) -> list:
-    sphere_centres = []
-    candidates = sdf_array.copy()
+    sphere_centres: list = []
 
+    if (sdf_array == 0).all():
+        return sphere_centres
+
+    candidates = sdf_array.copy()
     if minimal_sphere_radius > 0:
         remove_small_spheres_from_candidates(
             sdf_array=sdf_array,
