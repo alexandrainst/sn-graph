@@ -237,7 +237,7 @@ def create_SN_graph(
         Must be a 2D numpy array.
     max_num_vertices : int, optional
         Maximum number of vertices (sphere centers) to generate.
-        If -1 or 0, no limit is applied. Default is -1.
+        If -1, no limit is applied. Default is -1.
     max_edge_length : int, optional
         Maximum allowed length for edges between vertices.
         If -1, no limit is applied. Default is -1.
@@ -246,10 +246,10 @@ def create_SN_graph(
         Higher values create more restrictive connections. Default is 1.0.
     minimal_sphere_radius : float, optional
         Minimum radius allowed for spheres when placing vertices.
-        If -1, no minimum is enforced. Default is -1.
+        Default is 5
     return_sdf : bool, optional
         If True, the signed distance field array is returned as well.
-        TODO: implement default behavior for minimal_sphere_radius
+        Default is False
 
     Returns
     -------
