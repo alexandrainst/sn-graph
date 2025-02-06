@@ -66,23 +66,28 @@ def choose_sphere_centres(
     sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
 ) -> list:
     sphere_centres: list = []
-
-    if (sdf_array == 0).all():
+    if max_num_vertices == 0:
+        warnings.warn(
+            "max_num_vertices is 0, no vertices will be placed.", RuntimeWarning
+        )
         return sphere_centres
 
     candidates = sdf_array.copy()
+
     if minimal_sphere_radius > 0:
         remove_small_spheres_from_candidates(
             sdf_array=sdf_array,
             candidates_array=candidates,
             minimal_sphere_radius=minimal_sphere_radius,
         )
-    # find coordinates of the (first) maximal value in sdf_array (written in a numba-allowed way...)
+    if (candidates == 0).all():
+        warnings.warn(
+            f"Image is empty or there are no spheres larger that the minimal_sphere_radius: {minimal_sphere_radius}. No vertices will be placed.",
+            RuntimeWarning,
+        )
+        return sphere_centres
 
-    argmax_flat = np.argmax(sdf_array)
-    _, c = sdf_array.shape
-    first_centre = (argmax_flat // c, argmax_flat % c)
-
+    first_centre = np.unravel_index(sdf_array.argmax(), sdf_array.shape)
     sphere_centres.append(first_centre)
     update_candidates(
         sdf_array=sdf_array, candidates_array=candidates, new_centre=first_centre

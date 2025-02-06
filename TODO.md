@@ -10,3 +10,4 @@
 - add more examples
 - Implement the 3D version!
 - Argmax for 0 array still gives one vertex, that should not be the case
+- Maybe allow to adjust the sn_graph distance, so users can choose between sparser and denser spheres!
