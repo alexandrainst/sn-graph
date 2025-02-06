@@ -280,7 +280,7 @@ def create_SN_graph(
             RuntimeWarning,
         )
     print("Computing SDF array...")
-    sdf_array = skfmm.distance(image, dx=1)
+    sdf_array = skfmm.distance(image, dx=1, periodic=True)
     print("Computing sphere centres...")
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius

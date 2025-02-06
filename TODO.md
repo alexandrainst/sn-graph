@@ -10,4 +10,4 @@
 - add more examples
 - Implement the 3D version!
 - Argmax for 0 array still gives one vertex, that should not be the case
--if object touches images boudnary, so spheres go 'outside of the image'
+-
