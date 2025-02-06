@@ -1,13 +1,11 @@
 import numpy as np
-import skfmm
 from skimage.draw import line, circle_perimeter
 
 
 def draw_graph_on_image(
-    image: np.ndarray, spheres_centres: list, edges: list
+    image: np.ndarray, spheres_centres: list, edges: list, sdf_array: np.ndarray
 ) -> np.ndarray:
     img = image.copy()
-    sdf_array = skfmm.distance(image, dx=1)
 
     for edge in edges:
         pixels = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])

@@ -98,6 +98,7 @@ def choose_sphere_centres(
         if i == max_num_vertices:
             break
         next_centre = choose_next_sphere(sdf_array, sphere_centres, candidates)
+        print(f"Added a new sphere{next_centre} of radius{sdf_array[next_centre]}")
         if not next_centre:
             break
         sphere_centres.append(next_centre)
@@ -288,7 +289,11 @@ def create_SN_graph(
             RuntimeWarning,
         )
     print("Computing SDF array...")
-    sdf_array = skfmm.distance(image, dx=1, periodic=True)
+
+    padded_image = np.pad(image, 1)
+    padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
+    sdf_array = padded_sdf_array[1:-1, 1:-1]
+
     print("Computing sphere centres...")
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
