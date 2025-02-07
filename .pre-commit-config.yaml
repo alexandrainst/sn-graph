@@ -42,7 +42,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: poetry run pytest --cov=src.sn_graph --cov-report=term-missing
+        entry: poetry run pytest --cov=src.sn_graph --cov-report=html --cov-report=term-missing
         language: system
         pass_filenames: false
         require_serial: true
