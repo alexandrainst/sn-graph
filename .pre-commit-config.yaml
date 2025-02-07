@@ -38,3 +38,12 @@ repos:
             --ignore-missing-imports,
             --show-error-codes,
           ]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: poetry run pytest
+        language: system
+        types: [python]
+        pass_filenames: false
