@@ -169,7 +169,10 @@ def edge_is_mostly_within_object(
 
 
 def edge_is_close_to_many_spheres(
-    edge: tuple, spheres_centres: list, sdf_array: np.ndarray
+    edge: tuple,
+    spheres_centres: list,
+    sdf_array: np.ndarray,
+    edge_sphere_threshold: float,
 ) -> bool:
     """Check if there are no more than two spheres too close to the edge.
 
@@ -181,9 +184,13 @@ def edge_is_close_to_many_spheres(
     Returns:
         bool -- True if there are no more than two spheres too close to the edge, False otherwise
     """
+
     close_spheres_count = 0
     for centre in spheres_centres:
-        if point_interval_distance(centre, edge[0], edge[1]) < sdf_array[centre] - 2:
+        if (
+            point_interval_distance(centre, edge[0], edge[1])
+            < edge_sphere_threshold * sdf_array[centre]
+        ):
             close_spheres_count += 1
         # there is always two close spheres, namely the ones that we are connecting. We do not want any more spheres to be close.
         if close_spheres_count > 2:
@@ -194,8 +201,9 @@ def edge_is_close_to_many_spheres(
 def determine_edges(
     spheres_centres: list,
     sdf_array: np.ndarray,
-    edge_threshold: float,
     max_edge_length: int,
+    edge_threshold: float,
+    edge_sphere_threshold: float,
 ) -> list:
     if max_edge_length == -1:
         max_edge_length = np.inf
@@ -207,7 +215,9 @@ def determine_edges(
         if edge[0] != edge[1]
         and euclid_dist(edge[0], edge[1]) < max_edge_length
         and edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
-        and not edge_is_close_to_many_spheres(edge, spheres_centres, sdf_array)
+        and not edge_is_close_to_many_spheres(
+            edge, spheres_centres, sdf_array, edge_sphere_threshold
+        )
     ]
 
     return actual_edges
@@ -219,9 +229,10 @@ def determine_edges(
 def create_SN_graph(
     image: np.ndarray,
     max_num_vertices: int = -1,
-    max_edge_length: int = -1,
     edge_threshold: float = 1.0,
+    max_edge_length: int = -1,
     minimal_sphere_radius: float = 5,
+    edge_sphere_threshold: float = 0.95,
     return_sdf: bool = False,
 ) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
     """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
@@ -237,16 +248,21 @@ def create_SN_graph(
         Must be a 2D numpy array.
     max_num_vertices : int, optional
         Maximum number of vertices (sphere centers) to generate.
-        If -1, no limit is applied. Default is -1.
+        If -1, no limit is applied.
+        Default is -1.
+    edge_threshold : float, optional
+        Threshold value for determining what is the minimal portion of an edge that has to lie within the object.
+        Higher value is more restrictive, with 1 requiring edge to be fully contained in the object.
+        Default is 1.0.
     max_edge_length : int, optional
         Maximum allowed length for edges between vertices.
         If -1, no limit is applied. Default is -1.
-    edge_threshold : float, optional
-        Threshold value for determining edge connectivity.
-        Higher values create more restrictive connections. Default is 1.0.
     minimal_sphere_radius : float, optional
         Minimum radius allowed for spheres when placing vertices.
         Default is 5
+    edge_sphere_threshold: float, optional
+        Threshold value for deciding how close can edge be to a non-enpdpoint spheres. Higher value is more restricrive, with 1 allowing no overlap whatsoever.
+        Default is 0.95,
     return_sdf : bool, optional
         If True, the signed distance field array is returned as well.
         Default is False
@@ -298,7 +314,13 @@ def create_SN_graph(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
     print("Computing edges...")
-    edges = determine_edges(spheres_centres, sdf_array, edge_threshold, max_edge_length)
+    edges = determine_edges(
+        spheres_centres,
+        sdf_array,
+        max_edge_length,
+        edge_threshold,
+        edge_sphere_threshold,
+    )
 
     if return_sdf:
         return spheres_centres, edges, sdf_array
