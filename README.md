@@ -39,6 +39,7 @@ centers, edges = sn.create_SN_graph(
 - `max_edge_length`: Maximum allowed edge length
 - `edge_threshold`: Threshold for determining what portion of an edge must be contained within the shape
 - `minimal_sphere_radius`: Minimum radius allowed for spheres
+- `edge_sphere_threshold`: Threshold value for deciding how close can an edge be to a non-enpdpoint spheres
 
 ## Authors
 - Tomasz Prytuła (<tomasz.prytula@alexandra.dk>)
