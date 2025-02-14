@@ -226,7 +226,7 @@ def determine_edges(
 # finally the function to create the graph out of a signed distance field array
 
 
-def create_SN_graph(
+def create_sn_graph(
     image: np.ndarray,
     max_num_vertices: int = -1,
     edge_threshold: float = 1.0,
@@ -297,23 +297,23 @@ def create_SN_graph(
         image.ndim == 2
     ), f"Input image must be 2D, received shape {image.shape} (after squeezing)."
 
-    if minimal_sphere_radius < 5:
+    if minimal_sphere_radius / image.size < 0.0001:
         warnings.warn(
-            f"Small minimal_sphere_radius ({minimal_sphere_radius}) detected. Low values may significantly "
+            f"Small minimal_sphere_radius ({minimal_sphere_radius}) comapred to the image size {image.size} detected. Low values may significantly "
             f"increase runtime. Recommended value: >= 5",
             RuntimeWarning,
         )
-    print("Computing SDF array...")
+    # print("Computing SDF array...")
 
     padded_image = np.pad(image, 1)
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
     sdf_array = padded_sdf_array[1:-1, 1:-1]
 
-    print("Computing sphere centres...")
+    # print("Computing sphere centres...")
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
-    print("Computing edges...")
+    # print("Computing edges...")
     edges = determine_edges(
         spheres_centres,
         sdf_array,
