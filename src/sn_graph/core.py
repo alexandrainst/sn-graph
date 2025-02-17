@@ -5,32 +5,32 @@ from typing import Tuple, Union, Any
 import warnings
 from itertools import combinations
 
-
 # first functions to get vertices
+
+
 def sn_graph_distance_vectorized(
     v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
-) -> np.ndarray:
+) -> Tuple[np.ndarray, np.ndarray]:
     """Vectorized version of SN-Graph paper distance between vertices
     v_i: shape (N, 2) array of source points
     v_j: shape (M, 2) array of target points
-    Returns: shape (N, M) array of distances
+    Returns:
+        - shape (N, M) array of distances
+        - shape (N, M) boolean mask where True indicates valid distances
     """
-    # Euclidean distance between all pairs
-    # Using broadcasting to get (N, M) matrix of distances
+    # This part remains same as your code:
     diff = v_i[:, None, :] - v_j[None, :, :]  # Shape: (N, M, 2)
     distances = np.sqrt(np.sum(diff**2, axis=2))  # Shape: (N, M)
-
-    # SDF values at v_i points (shape N)
     sdf_vi = sdf_array[v_i[:, 0], v_i[:, 1]]
-
-    # SDF values at v_j points (shape M)
     sdf_vj = sdf_array[v_j[:, 0], v_j[:, 1]]
 
-    # Broadcasting to combine all terms:
-    # distances: (N, M)
-    # sdf_vi[:, None]: (N, 1) broadcasts across M
-    # sdf_vj[None, :]: (1, M) broadcasts across N
-    return distances - sdf_vi[:, None] + 2 * sdf_vj[None, :]
+    # Calculate valid mask to avoid intresectiong spheres
+    valid_mask = distances > (sdf_vi[:, None] + sdf_vj[None, :])
+
+    # Calculate final distances as before
+    final_distances = distances - sdf_vi[:, None] + 2 * sdf_vj[None, :]
+
+    return final_distances, valid_mask
 
 
 def update_candidates(
@@ -45,24 +45,40 @@ def update_candidates(
 def choose_next_sphere(
     sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
 ) -> Union[Any, Tuple[int, int]]:
-    # Get candidate coordinates as (M, 2) array
-    candidates = np.array(list(zip(*np.nonzero(candidates > 0))))
-    if len(candidates) == 0:
+    # Handle first sphere case
+    if not sphere_centres:
+        return tuple(np.unravel_index(sdf_array.argmax(), sdf_array.shape))
+
+    candidates_sparse = np.array(list(zip(*np.nonzero(candidates > 0))))
+    if len(candidates_sparse) == 0:
         return None
 
-    # Convert sphere_centres to (N, 2) array
     sphere_centres = np.array(sphere_centres)
 
-    # Get distances between all sphere centers and candidates
-    # Shape: (N, M)
-    distances = sn_graph_distance_vectorized(sphere_centres, candidates, sdf_array)
+    # Get distances and validity mask
+    distances, valid_mask = sn_graph_distance_vectorized(
+        sphere_centres, candidates_sparse, sdf_array
+    )
 
-    # Get minimum distance for each candidate
-    min_distances = np.min(distances, axis=0)
+    # A candidate is only valid if it has valid distances to ALL existing spheres
+    valid_candidates = np.all(valid_mask, axis=0)  # Check all rows for each candidate
 
-    # Return candidate with maximum minimum distance
-    best_idx = np.argmax(min_distances)
-    return tuple(candidates[best_idx])
+    if not np.any(valid_candidates):
+        return None
+
+    # Only consider distances for completely valid candidates
+    valid_distances = distances[:, valid_candidates]
+
+    # Find the minimum distance to existing spheres for each valid candidate
+    min_distances_valid = np.min(valid_distances, axis=0)
+
+    # Among the valid candidates, find the one with maximum minimum distance
+    best_valid_idx = np.argmax(min_distances_valid)
+
+    # Map back to original candidate index
+    original_idx = np.where(valid_candidates)[0][best_valid_idx]
+
+    return tuple(candidates_sparse[original_idx])
 
 
 def choose_sphere_centres(
@@ -76,7 +92,6 @@ def choose_sphere_centres(
         return sphere_centres
 
     candidates = sdf_array.copy()
-
     # Remove small spheres from candidates
     if minimal_sphere_radius > 0:
         candidates[sdf_array < minimal_sphere_radius] = 0
@@ -88,16 +103,10 @@ def choose_sphere_centres(
         )
         return sphere_centres
 
-    first_centre = np.unravel_index(sdf_array.argmax(), sdf_array.shape)
-    sphere_centres.append(first_centre)
-    update_candidates(
-        sdf_array=sdf_array, candidates_array=candidates, new_centre=first_centre
-    )
-
-    i = 1
-    while True:
-        if i == max_num_vertices:
-            break
+    if max_num_vertices == -1:
+        max_num_vertices = np.inf
+    i = 0
+    while i < max_num_vertices:
         next_centre = choose_next_sphere(sdf_array, sphere_centres, candidates)
         if not next_centre:
             break
@@ -109,8 +118,6 @@ def choose_sphere_centres(
 
 
 # now functions to get edges
-
-
 def point_interval_distance(
     point: Tuple[int, int],
     interval_start: Tuple[int, int],

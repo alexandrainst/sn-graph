@@ -15,7 +15,7 @@ def draw_graph_on_image(
         pixels = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
         img[pixels] = 2
 
-    # If no sdf_array given, draw cirlces with 0 radius, i.e. jus their centres.
+    # If no sdf_array given, draw cirlces with 0 radius, i.e. just their centres.
     if sdf_array is None:
         sdf_array = np.zeros(img.shape)
 
