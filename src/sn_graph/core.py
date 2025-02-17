@@ -5,10 +5,106 @@ from typing import Tuple, Union, Any
 import warnings
 from itertools import combinations
 
-# first functions to get vertices
+
+def create_sn_graph(
+    image: np.ndarray,
+    max_num_vertices: int = -1,
+    edge_threshold: float = 1.0,
+    max_edge_length: int = -1,
+    minimal_sphere_radius: float = 5.0,
+    edge_sphere_threshold: float = 1.0,
+    return_sdf: bool = False,
+) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
+    """Create a graph from an image using the Sphere-Node (SN) graph skeletonisation algorithm.
+
+    This function converts a grayscale image into a graph representation by first computing
+    its signed distance field (assuming boundary contour has value 0), then placing sphere centers as vertices and creating edges between neighboring spheres based on specified criteria.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        Grayscale input image where foreground is positive and background is 0.
+        Must be a 2D numpy array.
+    max_num_vertices : int, optional
+        Maximum number of vertices (sphere centers) to generate.
+        If -1, no limit is applied.
+        Default is -1.
+    edge_threshold : float, optional
+        Threshold value for determining what is the minimal portion of an edge that has to lie within the object.
+        Higher value is more restrictive, with 1 requiring edge to be fully contained in the object.
+        Default is 1.0.
+    max_edge_length : int, optional
+        Maximum allowed length for edges between vertices.
+        If -1, no limit is applied. Default is -1.
+    minimal_sphere_radius : float, optional
+        Minimum radius allowed for spheres when placing vertices.
+        Default is 5
+    edge_sphere_threshold: float, optional
+        Threshold value for deciding how close can edge be to a non-enpdpoint spheres. Higher value is more restricrive, with 1 allowing no overlap whatsoever.
+        Default is 0.95,
+    return_sdf : bool, optional
+        If True, the signed distance field array is returned as well.
+        Default is False
+
+    Returns
+    -------
+    Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]
+        A tuple containing:
+        - List of sphere centers as (x, y) coordinates
+        - List of edges as pairs of vertex indices
+
+    Notes
+    -----
+    The function uses the Fast Marching Method (FMM) to compute the signed distance
+    field of the input image. Sphere centers are placed using an SN graph minimax alrogithm, and edges are created based on sphere neighborhood relationships.
+
+    See Also
+    --------
+    skfmm.distance : Computes the signed distance field
+    choose_sphere_centres : Determines optimal placement of sphere centers
+    determine_edges : Creates edges between neighboring spheres
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> img = np.zeros((100, 100))
+    >>> img[40:60, 40:60] = 1  # Create a square
+    >>> centers, edges = create_SN_graph(img, max_num_vertices=10)
+    """
+
+    image = np.squeeze(image)
+    assert (
+        image.ndim == 2
+    ), f"Input image must be 2D, received shape {image.shape} (after squeezing)."
+
+    print("Computing SDF array...")
+
+    # Pad the image with 1's to avoid edge effects in the signed distance field computation
+    padded_image = np.pad(image, 1)
+    padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
+    # Remove padding
+    sdf_array = padded_sdf_array[1:-1, 1:-1]
+
+    print("Computing sphere centres...")
+    spheres_centres = choose_sphere_centres(
+        sdf_array, max_num_vertices, minimal_sphere_radius
+    )
+    print("Computing edges...")
+    edges = determine_edges(
+        spheres_centres,
+        sdf_array,
+        max_edge_length,
+        edge_threshold,
+        edge_sphere_threshold,
+    )
+
+    if return_sdf:
+        return spheres_centres, edges, sdf_array
+    return spheres_centres, edges
 
 
-def sn_graph_distance_vectorized(
+# First functions to get vertices
+def _sn_graph_distance_vectorized(
     v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Vectorized version of SN-Graph paper distance between vertices
@@ -33,7 +129,7 @@ def sn_graph_distance_vectorized(
     return final_distances, valid_mask
 
 
-def update_candidates(
+def _update_candidates(
     sdf_array: np.ndarray, candidates_array: np.ndarray, new_centre: Tuple[int, int]
 ) -> None:
     """Update the candidates array after placing a new sphere center."""
@@ -42,9 +138,11 @@ def update_candidates(
     return
 
 
-def choose_next_sphere(
+def _choose_next_sphere(
     sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
 ) -> Union[Any, Tuple[int, int]]:
+    """Choose the next sphere center based on the SN-Graph paper algorithm."""
+
     # Handle first sphere case
     if not sphere_centres:
         return tuple(np.unravel_index(sdf_array.argmax(), sdf_array.shape))
@@ -56,7 +154,7 @@ def choose_next_sphere(
     sphere_centres = np.array(sphere_centres)
 
     # Get distances and validity mask
-    distances, valid_mask = sn_graph_distance_vectorized(
+    distances, valid_mask = _sn_graph_distance_vectorized(
         sphere_centres, candidates_sparse, sdf_array
     )
 
@@ -107,18 +205,18 @@ def choose_sphere_centres(
         max_num_vertices = np.inf
     i = 0
     while i < max_num_vertices:
-        next_centre = choose_next_sphere(sdf_array, sphere_centres, candidates)
+        next_centre = _choose_next_sphere(sdf_array, sphere_centres, candidates)
         if not next_centre:
             break
         sphere_centres.append(next_centre)
-        update_candidates(sdf_array, candidates, next_centre)
+        _update_candidates(sdf_array, candidates, next_centre)
         i += 1
 
     return sphere_centres
 
 
 # now functions to get edges
-def point_interval_distance(
+def _point_interval_distance(
     point: Tuple[int, int],
     interval_start: Tuple[int, int],
     interval_end: Tuple[int, int],
@@ -157,7 +255,7 @@ def point_interval_distance(
         return float(np.linalg.norm(p - h))
 
 
-def edge_is_mostly_within_object(
+def _edge_is_mostly_within_object(
     edge: tuple, edge_treshold: float, sdf_array: np.ndarray
 ) -> bool:
     """Check if a sufficient portion of the edge lies within the object.
@@ -176,7 +274,7 @@ def edge_is_mostly_within_object(
     return bool(good_part >= edge_treshold * amount_of_pixels)
 
 
-def edge_is_close_to_many_spheres(
+def _edge_is_close_to_many_spheres(
     edge: tuple,
     spheres_centres: list,
     sdf_array: np.ndarray,
@@ -196,7 +294,7 @@ def edge_is_close_to_many_spheres(
     close_spheres_count = 0
     for centre in spheres_centres:
         if (
-            point_interval_distance(centre, edge[0], edge[1])
+            _point_interval_distance(centre, edge[0], edge[1])
             < edge_sphere_threshold * sdf_array[centre]
         ):
             close_spheres_count += 1
@@ -222,109 +320,10 @@ def determine_edges(
         for edge in possible_edges
         if edge[0] != edge[1]
         and np.linalg.norm(np.array(edge[0]) - np.array(edge[1])) < max_edge_length
-        and edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
-        and not edge_is_close_to_many_spheres(
+        and _edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
+        and not _edge_is_close_to_many_spheres(
             edge, spheres_centres, sdf_array, edge_sphere_threshold
         )
     ]
 
     return actual_edges
-
-
-# finally the function to create the graph out of a signed distance field array
-
-
-def create_sn_graph(
-    image: np.ndarray,
-    max_num_vertices: int = -1,
-    edge_threshold: float = 1.0,
-    max_edge_length: int = -1,
-    minimal_sphere_radius: float = 5.0,
-    edge_sphere_threshold: float = 1.0,
-    return_sdf: bool = False,
-) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
-    """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
-
-    This function converts a binary image into a graph representation by first computing
-    its signed distance field, then placing sphere centers as vertices and creating edges
-    between neighboring spheres based on specified criteria.
-
-    Parameters
-    ----------
-    image : np.ndarray
-        Binary input image where foreground is 1 and background is 0.
-        Must be a 2D numpy array.
-    max_num_vertices : int, optional
-        Maximum number of vertices (sphere centers) to generate.
-        If -1, no limit is applied.
-        Default is -1.
-    edge_threshold : float, optional
-        Threshold value for determining what is the minimal portion of an edge that has to lie within the object.
-        Higher value is more restrictive, with 1 requiring edge to be fully contained in the object.
-        Default is 1.0.
-    max_edge_length : int, optional
-        Maximum allowed length for edges between vertices.
-        If -1, no limit is applied. Default is -1.
-    minimal_sphere_radius : float, optional
-        Minimum radius allowed for spheres when placing vertices.
-        Default is 5
-    edge_sphere_threshold: float, optional
-        Threshold value for deciding how close can edge be to a non-enpdpoint spheres. Higher value is more restricrive, with 1 allowing no overlap whatsoever.
-        Default is 0.95,
-    return_sdf : bool, optional
-        If True, the signed distance field array is returned as well.
-        Default is False
-
-    Returns
-    -------
-    Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]
-        A tuple containing:
-        - List of sphere centers as (x, y) coordinates
-        - List of edges as pairs of vertex indices
-
-    Notes
-    -----
-    The function uses the Fast Marching Method (FMM) to compute the signed distance
-    field of the input image. Sphere centers are placed using an SN graph minimax alrogithm, and edges are created based on sphere neighborhood relationships.
-
-    See Also
-    --------
-    skfmm.distance : Computes the signed distance field
-    choose_sphere_centres : Determines optimal placement of sphere centers
-    determine_edges : Creates edges between neighboring spheres
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> img = np.zeros((100, 100))
-    >>> img[40:60, 40:60] = 1  # Create a square
-    >>> centers, edges = create_SN_graph(img, max_num_vertices=10)
-    """
-    image = np.squeeze(image)
-    assert (
-        image.ndim == 2
-    ), f"Input image must be 2D, received shape {image.shape} (after squeezing)."
-
-    print("Computing SDF array...")
-
-    padded_image = np.pad(image, 1)
-
-    padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
-    sdf_array = padded_sdf_array[1:-1, 1:-1]
-
-    print("Computing sphere centres...")
-    spheres_centres = choose_sphere_centres(
-        sdf_array, max_num_vertices, minimal_sphere_radius
-    )
-    print("Computing edges...")
-    edges = determine_edges(
-        spheres_centres,
-        sdf_array,
-        max_edge_length,
-        edge_threshold,
-        edge_sphere_threshold,
-    )
-
-    if return_sdf:
-        return spheres_centres, edges, sdf_array
-    return spheres_centres, edges
