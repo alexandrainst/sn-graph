@@ -42,20 +42,6 @@ def update_candidates(
     return
 
 
-def remove_small_spheres_from_candidates(
-    sdf_array: np.ndarray, candidates_array: np.ndarray, minimal_sphere_radius: float
-) -> None:
-    """Remove small spheres from the candidates array based on a minimal radius.
-
-    Arguments:
-        sdf_array -- signed distance field array
-        candidates_array -- array of candidate sphere centers (non zero values are candidates)
-        minimal_sphere_radius -- minimal radius allowed for spheres
-    """
-    candidates_array[sdf_array < minimal_sphere_radius] = 0
-    return
-
-
 def choose_next_sphere(
     sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
 ) -> Union[Any, Tuple[int, int]]:
@@ -91,12 +77,10 @@ def choose_sphere_centres(
 
     candidates = sdf_array.copy()
 
+    # Remove small spheres from candidates
     if minimal_sphere_radius > 0:
-        remove_small_spheres_from_candidates(
-            sdf_array=sdf_array,
-            candidates_array=candidates,
-            minimal_sphere_radius=minimal_sphere_radius,
-        )
+        candidates[sdf_array < minimal_sphere_radius] = 0
+
     if (candidates == 0).all():
         warnings.warn(
             f"Image is empty or there are no spheres larger that the minimal_sphere_radius: {minimal_sphere_radius}. No vertices will be placed.",
