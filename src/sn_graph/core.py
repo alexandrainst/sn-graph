@@ -7,21 +7,30 @@ from itertools import combinations
 
 
 # first functions to get vertices
+def sn_graph_distance_vectorized(
+    v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
+) -> np.ndarray:
+    """Vectorized version of SN-Graph paper distance between vertices
+    v_i: shape (N, 2) array of source points
+    v_j: shape (M, 2) array of target points
+    Returns: shape (N, M) array of distances
+    """
+    # Euclidean distance between all pairs
+    # Using broadcasting to get (N, M) matrix of distances
+    diff = v_i[:, None, :] - v_j[None, :, :]  # Shape: (N, M, 2)
+    distances = np.sqrt(np.sum(diff**2, axis=2))  # Shape: (N, M)
 
+    # SDF values at v_i points (shape N)
+    sdf_vi = sdf_array[v_i[:, 0], v_i[:, 1]]
 
-def euclid_dist(v_1: Tuple[int, int], v_2: Tuple[int, int]) -> float:
-    return float(np.sqrt((v_1[0] - v_2[0]) ** 2 + (v_1[1] - v_2[1]) ** 2))
+    # SDF values at v_j points (shape M)
+    sdf_vj = sdf_array[v_j[:, 0], v_j[:, 1]]
 
-
-def sn_graph_distance(
-    v_i: Tuple[int, int], v_j: Tuple[int, int], sdf_array: np.ndarray
-) -> float:
-    """SN-Graph paper distance between two vertices"""
-    return float(
-        euclid_dist(v_i, v_j)
-        - sdf_array[v_i[0], v_i[1]]
-        + 2 * sdf_array[v_j[0], v_j[1]]
-    )
+    # Broadcasting to combine all terms:
+    # distances: (N, M)
+    # sdf_vi[:, None]: (N, 1) broadcasts across M
+    # sdf_vj[None, :]: (1, M) broadcasts across N
+    return distances - sdf_vi[:, None] + 2 * sdf_vj[None, :]
 
 
 def update_candidates(
@@ -50,16 +59,24 @@ def remove_small_spheres_from_candidates(
 def choose_next_sphere(
     sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
 ) -> Union[Any, Tuple[int, int]]:
-    candidates = list(zip(*np.nonzero(candidates > 0)))
-    if not candidates:
+    # Get candidate coordinates as (M, 2) array
+    candidates = np.array(list(zip(*np.nonzero(candidates > 0))))
+    if len(candidates) == 0:
         return None
-    candidates_with_values = [
-        (min([sn_graph_distance(v_i, v_j, sdf_array) for v_i in sphere_centres]), v_j)
-        for v_j in candidates
-    ]
-    candidates_with_values.sort(key=lambda x: -x[0])
 
-    return candidates_with_values[0][1]
+    # Convert sphere_centres to (N, 2) array
+    sphere_centres = np.array(sphere_centres)
+
+    # Get distances between all sphere centers and candidates
+    # Shape: (N, M)
+    distances = sn_graph_distance_vectorized(sphere_centres, candidates, sdf_array)
+
+    # Get minimum distance for each candidate
+    min_distances = np.min(distances, axis=0)
+
+    # Return candidate with maximum minimum distance
+    best_idx = np.argmax(min_distances)
+    return tuple(candidates[best_idx])
 
 
 def choose_sphere_centres(
@@ -213,7 +230,7 @@ def determine_edges(
         edge
         for edge in possible_edges
         if edge[0] != edge[1]
-        and euclid_dist(edge[0], edge[1]) < max_edge_length
+        and np.linalg.norm(np.array(edge[0]) - np.array(edge[1])) < max_edge_length
         and edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
         and not edge_is_close_to_many_spheres(
             edge, spheres_centres, sdf_array, edge_sphere_threshold
@@ -303,17 +320,18 @@ def create_sn_graph(
             f"increase runtime. Recommended value: >= 5",
             RuntimeWarning,
         )
-    # print("Computing SDF array...")
+    print("Computing SDF array...")
 
     padded_image = np.pad(image, 1)
+
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
     sdf_array = padded_sdf_array[1:-1, 1:-1]
 
-    # print("Computing sphere centres...")
+    print("Computing sphere centres...")
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
-    # print("Computing edges...")
+    print("Computing edges...")
     edges = determine_edges(
         spheres_centres,
         sdf_array,
