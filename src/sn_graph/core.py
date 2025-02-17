@@ -298,12 +298,6 @@ def create_sn_graph(
         image.ndim == 2
     ), f"Input image must be 2D, received shape {image.shape} (after squeezing)."
 
-    if minimal_sphere_radius / image.size < 0.0001:
-        warnings.warn(
-            f"Small minimal_sphere_radius ({minimal_sphere_radius}) comapred to the image size {image.size} detected. Low values may significantly "
-            f"increase runtime. Recommended value: >= 5",
-            RuntimeWarning,
-        )
     print("Computing SDF array...")
 
     padded_image = np.pad(image, 1)
