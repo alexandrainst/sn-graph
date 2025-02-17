@@ -239,8 +239,8 @@ def create_sn_graph(
     max_num_vertices: int = -1,
     edge_threshold: float = 1.0,
     max_edge_length: int = -1,
-    minimal_sphere_radius: float = 5,
-    edge_sphere_threshold: float = 0.95,
+    minimal_sphere_radius: float = 5.0,
+    edge_sphere_threshold: float = 1.0,
     return_sdf: bool = False,
 ) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
     """Create a graph from an image using the Spherical Neighborhood (SN) Graph algorithm.
