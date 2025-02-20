@@ -1,9 +1,11 @@
 import numpy as np
 import skfmm
-from skimage.draw import line, disk
+from skimage.draw import line
 from typing import Tuple, Union, Any
 import warnings
 from itertools import combinations
+
+import time
 
 
 def create_sn_graph(
@@ -78,6 +80,7 @@ def create_sn_graph(
     ), f"Input image must be 2D, received shape {image.shape} (after squeezing)."
 
     print("Computing SDF array...")
+    start = time.time()
 
     # Pad the image with 1's to avoid edge effects in the signed distance field computation
     padded_image = np.pad(image, 1)
@@ -85,11 +88,23 @@ def create_sn_graph(
     # Remove padding
     sdf_array = padded_sdf_array[1:-1, 1:-1]
 
+    # your function or code here
+    end = time.time()
+    print(f"Time taken: {end - start:.4f} seconds")
+
     print("Computing sphere centres...")
+    start = time.time()
+
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
+
+    end = time.time()
+    print(f"Time taken: {end - start:.4f} seconds")
+
     print("Computing edges...")
+    start = time.time()
+
     edges = determine_edges(
         spheres_centres,
         sdf_array,
@@ -97,6 +112,8 @@ def create_sn_graph(
         edge_threshold,
         edge_sphere_threshold,
     )
+    end = time.time()
+    print(f"Time taken: {end - start:.4f} seconds")
 
     if return_sdf:
         return spheres_centres, edges, sdf_array
@@ -107,49 +124,27 @@ def create_sn_graph(
 def _sn_graph_distance_vectorized(
     v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Vectorized version of SN-Graph paper distance between vertices
-    v_i: shape (N, 2) array of source points
-    v_j: shape (M, 2) array of target points
-    Returns:
-        - shape (N, M) array of distances
-        - shape (N, M) boolean mask where True indicates valid distances
-    """
-    # This part remains same as your code:
+    """Vectorized version of SN-Graph paper distance between vertices."""
     diff = v_i[:, None, :] - v_j[None, :, :]  # Shape: (N, M, 2)
     distances = np.sqrt(np.sum(diff**2, axis=2))  # Shape: (N, M)
+
     sdf_vi = sdf_array[v_i[:, 0], v_i[:, 1]]
     sdf_vj = sdf_array[v_j[:, 0], v_j[:, 1]]
 
-    # Calculate valid mask to avoid intresectiong spheres
     valid_mask = distances > (sdf_vi[:, None] + sdf_vj[None, :])
-
-    # Calculate final distances as before
     final_distances = distances - sdf_vi[:, None] + 2 * sdf_vj[None, :]
-
     return final_distances, valid_mask
 
 
-def _update_candidates(
-    sdf_array: np.ndarray, candidates_array: np.ndarray, new_centre: Tuple[int, int]
-) -> None:
-    """Update the candidates array after placing a new sphere center."""
-
-    candidates_array[disk(new_centre, sdf_array[new_centre], shape=sdf_array.shape)] = 0
-    return
-
-
 def _choose_next_sphere(
-    sdf_array: np.ndarray, sphere_centres: list, candidates: np.ndarray
-) -> Union[Any, Tuple[int, int]]:
-    """Choose the next sphere center based on the SN-Graph paper algorithm."""
-
-    # Handle first sphere case
+    sdf_array: np.ndarray, sphere_centres: list, candidates_sparse: np.ndarray
+) -> Tuple[Union[Any, Tuple[int, int]], np.ndarray]:
+    """Choose the next sphere center and return both the center and valid candidates mask."""
     if not sphere_centres:
-        return tuple(np.unravel_index(sdf_array.argmax(), sdf_array.shape))
+        return tuple(np.unravel_index(sdf_array.argmax(), sdf_array.shape)), None
 
-    candidates_sparse = np.array(list(zip(*np.nonzero(candidates > 0))))
     if len(candidates_sparse) == 0:
-        return None
+        return None, None
 
     sphere_centres = np.array(sphere_centres)
 
@@ -159,57 +154,67 @@ def _choose_next_sphere(
     )
 
     # A candidate is only valid if it has valid distances to ALL existing spheres
-    valid_candidates = np.all(valid_mask, axis=0)  # Check all rows for each candidate
+    valid_candidates = np.all(valid_mask, axis=0)
 
     if not np.any(valid_candidates):
-        return None
+        return None, None
 
-    # Only consider distances for completely valid candidates
+    # Only consider distances for valid candidates
     valid_distances = distances[:, valid_candidates]
-
-    # Find the minimum distance to existing spheres for each valid candidate
     min_distances_valid = np.min(valid_distances, axis=0)
-
-    # Among the valid candidates, find the one with maximum minimum distance
     best_valid_idx = np.argmax(min_distances_valid)
 
     # Map back to original candidate index
     original_idx = np.where(valid_candidates)[0][best_valid_idx]
 
-    return tuple(candidates_sparse[original_idx])
+    return tuple(candidates_sparse[original_idx]), valid_candidates
 
 
 def choose_sphere_centres(
     sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
 ) -> list:
+    """Modified version that uses valid_mask to maintain candidates."""
     sphere_centres: list = []
+
     if max_num_vertices == 0:
         warnings.warn(
             "max_num_vertices is 0, no vertices will be placed.", RuntimeWarning
         )
         return sphere_centres
 
-    candidates = sdf_array.copy()
-    # Remove small spheres from candidates
+    # Initialize candidates as sparse coordinates
     if minimal_sphere_radius > 0:
-        candidates[sdf_array < minimal_sphere_radius] = 0
+        candidates_mask = sdf_array >= minimal_sphere_radius
+    else:
+        candidates_mask = sdf_array > 0
 
-    if (candidates == 0).all():
+    if not np.any(candidates_mask):
         warnings.warn(
-            f"Image is empty or there are no spheres larger that the minimal_sphere_radius: {minimal_sphere_radius}. No vertices will be placed.",
+            f"Image is empty or there are no spheres larger than the minimal_sphere_radius: {minimal_sphere_radius}. No vertices will be placed.",
             RuntimeWarning,
         )
         return sphere_centres
 
+    # Convert to sparse coordinates
+    candidates_sparse = np.array(np.where(candidates_mask)).T
+
     if max_num_vertices == -1:
         max_num_vertices = np.inf
+
     i = 0
     while i < max_num_vertices:
-        next_centre = _choose_next_sphere(sdf_array, sphere_centres, candidates)
-        if not next_centre:
+        next_centre, valid_candidates = _choose_next_sphere(
+            sdf_array, sphere_centres, candidates_sparse
+        )
+        if next_centre is None:
             break
+
         sphere_centres.append(next_centre)
-        _update_candidates(sdf_array, candidates, next_centre)
+
+        # Update candidates using the valid_mask from choose_next_sphere
+        if valid_candidates is not None:  # Skip for first sphere
+            candidates_sparse = candidates_sparse[valid_candidates]
+
         i += 1
 
     return sphere_centres
