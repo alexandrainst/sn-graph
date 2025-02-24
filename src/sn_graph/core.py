@@ -134,12 +134,12 @@ def create_sn_graph(
 
 def _validate_args(
     image: np.ndarray,
-    max_num_vertices: int = -1,
-    edge_threshold: float = 1.0,
-    max_edge_length: int = -1,
-    minimal_sphere_radius: float = 5.0,
-    edge_sphere_threshold: float = 1.0,
-    return_sdf: bool = False,
+    max_num_vertices: int,
+    edge_threshold: float,
+    max_edge_length: int,
+    minimal_sphere_radius: float,
+    edge_sphere_threshold: float,
+    return_sdf: bool,
 ) -> Tuple[np.ndarray, int, float, int, float, float, bool]:
     assert isinstance(
         image, np.ndarray
