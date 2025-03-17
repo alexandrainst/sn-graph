@@ -3,8 +3,6 @@ import skfmm
 from skimage.draw import line
 from typing import Tuple, Union, Any
 import warnings
-from itertools import combinations
-
 import time
 
 
@@ -305,63 +303,54 @@ def choose_sphere_centres(
 
 
 # now functions to get edges
-
-
-def _edge_is_mostly_within_object(
-    edge: tuple, edge_treshold: float, sdf_array: np.ndarray
-) -> bool:
-    """Check if a sufficient portion of the edge lies within the object.
+def _edges_mostly_within_object_mask(
+    edges: np.ndarray, edge_threshold: float, sdf_array: np.ndarray
+) -> np.ndarray:
+    """Check if a sufficient portion of each edge lies within the object.
 
     Arguments:
-        edge -- tuple of two tuples, each representing a vertex
-        edge_treshold -- threshold value for how much of edge has to be qithin the
+        edges -- array of shape (n_edges, 2, 2) where each edge is defined by its start and end points
+        edge_threshold -- threshold value for how much of edge has to be within the object
         sdf_array -- signed distance field array
 
     Returns:
-        bool -- True if edge is mostly within the object, False otherwise
+        np.ndarray -- Boolean array of shape (n_edges,)
     """
+    n_edges = edges.shape[0]
+    is_mostly_within = np.zeros(n_edges, dtype=bool)
 
-    pixel_indices = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
-    good_part = (sdf_array[pixel_indices] > 0).sum()
-    amount_of_pixels = len(pixel_indices[0])
-    return bool(good_part >= edge_treshold * amount_of_pixels)
+    for i in range(n_edges):
+        start = edges[i, 0].astype(int)
+        end = edges[i, 1].astype(int)
+        pixel_indices = line(start[0], start[1], end[0], end[1])
+        good_part = (sdf_array[pixel_indices] > 0).sum()
+        amount_of_pixels = len(pixel_indices[0])
+        is_mostly_within[i] = good_part >= edge_threshold * amount_of_pixels
 
-
-def determine_edges(
-    spheres_centres: list,
-    sdf_array: np.ndarray,
-    max_edge_length: int,
-    edge_threshold: float,
-    edge_sphere_threshold: float,
-) -> list:
-    if max_edge_length == -1:
-        max_edge_length = np.inf
-
-    possible_edges = list(combinations(spheres_centres, 2))
-    actual_edges = [
-        edge
-        for edge in possible_edges
-        if edge[0] != edge[1]
-        and np.linalg.norm(np.array(edge[0]) - np.array(edge[1])) < max_edge_length
-        and _edge_is_mostly_within_object(edge, edge_threshold, sdf_array)
-    ]
-
-    actual_edges = filter_edges(
-        actual_edges, spheres_centres, sdf_array, edge_sphere_threshold
-    )
-
-    return actual_edges
+    return is_mostly_within
 
 
-def point_interval_distance_batch(
-    points: np.ndarray, edges_start: np.ndarray, edges_end: np.ndarray
-) -> np.ndarray:
-    p = np.asarray(points)[:, np.newaxis, :]  # Shape: (n_points, 1, 2)
-    a = np.asarray(edges_start)[np.newaxis, :, :]  # Shape: (1, n_edges, 2)
-    b = np.asarray(edges_end)[np.newaxis, :, :]  # Shape: (1, n_edges, 2)
+def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.ndarray:
+    """Calculate distances from each point to each edge.
+
+    Arguments:
+        points -- array of shape (n_points, 2)
+        edges -- array of shape (n_edges, 2, 2) where each edge is defined by start and end points
+
+    Returns:
+        np.ndarray -- array of shape (n_points, n_edges) containing distances
+    """
+    n_points = points.shape[0]
+    n_edges = edges.shape[0]
+
+    # Reshape arrays for broadcasting
+    p = points.reshape(n_points, 1, 2)
+    a = edges[:, 0].reshape(1, n_edges, 2)
+    b = edges[:, 1].reshape(1, n_edges, 2)
 
     ba = b - a  # Shape: (1, n_edges, 2)
-    ba_length = np.linalg.norm(ba, axis=2, keepdims=True)  # Shape: (1, n_edges, 1)
+    ba_length_squared = np.sum(ba**2, axis=2, keepdims=True)  # Shape: (1, n_edges, 1)
+    ba_length = np.sqrt(ba_length_squared)  # Shape: (1, n_edges, 1)
 
     # Handle degenerate edges
     degenerate_mask = ba_length < 1e-10
@@ -369,19 +358,19 @@ def point_interval_distance_batch(
     # Calculate projection
     pa = p - a  # Shape: (n_points, n_edges, 2)
     t = np.sum(pa * ba, axis=2, keepdims=True) / (
-        ba_length + 1e-10
+        ba_length_squared + 1e-10
     )  # Shape: (n_points, n_edges, 1)
 
     # Create masks for different conditions
     mask_before = t <= 0
-    mask_after = t >= ba_length
+    mask_after = t >= 1
 
     # Calculate distances for each case
     d_before = np.linalg.norm(pa, axis=2)  # Distance to start point
     d_after = np.linalg.norm(p - b, axis=2)  # Distance to end point
 
     # Project points onto lines
-    h = a + t * (ba / (ba_length + 1e-10))
+    h = a + t * ba
     d_between = np.linalg.norm(p - h, axis=2)
 
     # Combine results based on masks
@@ -395,22 +384,37 @@ def point_interval_distance_batch(
     return distances  # Shape: (n_points, n_edges)
 
 
-def edges_are_close_to_many_spheres_batch(
-    edges_start: np.ndarray,
-    edges_end: np.ndarray,
-    spheres_centres: list,
+def _edges_not_too_close_to_many_spheres_mask(
+    edges: np.ndarray,
+    spheres_centres_array: np.ndarray,
     sdf_array: np.ndarray,
     edge_sphere_threshold: float,
 ) -> np.ndarray:
+    """Determine which edges are not too close to more than 2 sphere (Every edge is intersecting 2 spheres at least which are its endpoints).
+
+    Arguments:
+        edges -- array of shape (n_edges, 2, 2)
+        spheres_centres -- array of shape (n_spheres, 2)
+        sdf_array -- signed distance field array
+        edge_sphere_threshold -- threshold for edge closeness to spheres
+
+    Returns:
+        np.ndarray -- Boolean array of shape (n_edges,)
+    """
+
+    n_edges = edges.shape[0]
+    if n_edges == 0:
+        return np.zeros(n_edges, dtype=bool)
+
     # Calculate distances between all sphere centers and all edges
-    distances = point_interval_distance_batch(
-        spheres_centres, edges_start, edges_end
+    distances = _points_intervals_distances(
+        spheres_centres_array, edges
     )  # Shape: (n_spheres, n_edges)
 
     # Calculate thresholds for each sphere
-    sphere_coords = np.array(spheres_centres).T
+    sphere_coords = spheres_centres_array.T.astype(int)  # Shape: (2, n_spheres)
     thresholds = (
-        edge_sphere_threshold * sdf_array[tuple(sphere_coords)]
+        edge_sphere_threshold * sdf_array[sphere_coords[0], sphere_coords[1]]
     )  # Shape: (n_spheres,)
 
     # Compare distances with thresholds
@@ -419,28 +423,60 @@ def edges_are_close_to_many_spheres_batch(
     # Count close spheres for each edge
     close_spheres_count = np.sum(close_mask, axis=0)  # Shape: (n_edges,)
 
-    return close_spheres_count > 2  # Shape: (n_edges,)
+    # Keep edges with <= 2 close spheres
+    keep_mask = close_spheres_count <= 2
+    return keep_mask
 
 
-def filter_edges(
-    edges: list,
+def determine_edges(
     spheres_centres: list,
     sdf_array: np.ndarray,
+    max_edge_length: float,
+    edge_threshold: float,
     edge_sphere_threshold: float,
 ) -> list:
-    if not edges:
+    """Determine valid edges between sphere centers.
+
+    Arguments:
+        spheres_centres -- list of tuples, each tuple contains (x, y) coordinates of a sphere center
+        sdf_array -- signed distance field array
+        max_edge_length -- maximum allowed edge length
+        edge_threshold -- threshold for edge being within object
+        edge_sphere_threshold -- threshold for edge closeness to spheres
+
+    Returns:
+        np.ndarray -- array of shape (n_edges, 2, 2) containing valid edges
+    """
+    # Convert list of tuples to numpy array for vectorized operations
+    spheres_centres_array = np.array(spheres_centres)
+    n_spheres = spheres_centres_array.shape[0]
+
+    if n_spheres == 0:
         return []
+    # Create all possible pairs of indices
+    idx_i, idx_j = np.where(np.triu(np.ones((n_spheres, n_spheres)), k=1))
+    # Get the corresponding sphere centers
+    edges = np.stack(
+        [np.stack([spheres_centres_array[idx_i], spheres_centres_array[idx_j]], axis=1)]
+    )[0]
 
-    # Convert list of edge tuples to arrays
-    edges_array = np.array(edges)
-    edges_start = edges_array[:, 0]
-    edges_end = edges_array[:, 1]
+    # Calculate edge lengths
+    edge_lengths = np.linalg.norm(edges[:, 1] - edges[:, 0], axis=1)
 
-    # Get mask of edges to keep (invert the result since we want edges with <= 2 close spheres)
-    keep_mask = ~edges_are_close_to_many_spheres_batch(
-        edges_start, edges_end, spheres_centres, sdf_array, edge_sphere_threshold
+    # Filter by length
+    length_mask = edge_lengths < max_edge_length
+    edges = edges[length_mask]
+
+    # Filter by being within object
+    within_object_mask = _edges_mostly_within_object_mask(
+        edges, edge_threshold, sdf_array
     )
+    edges = edges[within_object_mask]
 
-    # Convert back to list of tuples
-    filtered_edges = [tuple(map(tuple, edge)) for edge in edges_array[keep_mask]]
-    return filtered_edges
+    # Filter by closeness to too many spheres
+    not_too_close_mask = _edges_not_too_close_to_many_spheres_mask(
+        edges, spheres_centres_array, sdf_array, edge_sphere_threshold
+    )
+    valid_edges = edges[not_too_close_mask]
+
+    return list(valid_edges)
