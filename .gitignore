@@ -122,3 +122,7 @@ models/*
 
 #Test reports
 test-reports/
+
+
+## Torch models
+*.pth
