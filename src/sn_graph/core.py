@@ -56,7 +56,7 @@ def create_sn_graph(
     Notes
     -----
     The function uses the Fast Marching Method (FMM) to compute the signed distance
-    field of the input image. Sphere centers are placed using an SN graph minimax alrogithm, and edges are created based on sphere neighborhood relationships.
+    field of the input image. Sphere centers are placed using an SN graph minimax alrogithm, and edges are created based on a hard coded, 'common-sense'rules.
 
     See Also
     --------
@@ -206,7 +206,15 @@ def _validate_args(
 def _sn_graph_distance_vectorized(
     v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Vectorized version of SN-Graph paper distance between vertices."""
+    """Compute vectorized version of SN-Graph paper distance between vertices, and a mask of valid distances.
+
+    Args:
+        v_i: np.ndarray, shape (N, 2), coordinates of set of vertices already in the graph
+        V_j: np.ndarray, shape (M, 2), coordinates of candidate vertices
+        sdf_array: np.ndarray, signed distance field array
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: distances between vertices, and mask of valid distances
+    """
     diff = v_i[:, None, :] - v_j[None, :, :]  # Shape: (N, M, 2)
     distances = np.sqrt(np.sum(diff**2, axis=2))  # Shape: (N, M)
 
@@ -255,7 +263,14 @@ def _choose_next_sphere(
 def choose_sphere_centres(
     sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
 ) -> list:
-    """Modified version that uses valid_mask to maintain candidates."""
+    """Choose sphere centers based on SN-graph algorithm. Essentially iteratively applies choose_next_sphere function.
+    Args:
+        sdf_array: np.ndarray, signed distance field array
+        max_num_vertices: int, maximum number of vertices to generate
+        minimal_sphere_radius: float, minimal radius of spheres
+    Returns:
+        list: list of sphere centers as (x, y) coordinates
+    """
     sphere_centres: list = []
 
     if max_num_vertices == 0:
@@ -445,7 +460,7 @@ def determine_edges(
         edge_sphere_threshold -- threshold for edge closeness to spheres
 
     Returns:
-        np.ndarray -- array of shape (n_edges, 2, 2) containing valid edges
+        list -- list containing valid edges
     """
     # Convert list of tuples to numpy array for vectorized operations
     spheres_centres_array = np.array(spheres_centres)
