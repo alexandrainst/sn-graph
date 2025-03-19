@@ -71,25 +71,15 @@ def create_sn_graph(
         return_sdf,
     )
 
-    # Automatically infer dimensionality from the image
-    ndim = image.ndim
-
     print("Computing SDF array...")
     start = time.time()
 
     # Pad the image with 1's to avoid edge effects in the signed distance field computation
     padded_image = np.pad(image, 1)
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
-
-    # Remove padding based on dimensionality
-    if ndim == 2:
-        sdf_array = padded_sdf_array[1:-1, 1:-1]
-    elif ndim == 3:
-        sdf_array = padded_sdf_array[1:-1, 1:-1, 1:-1]
-    else:
-        # Create a slice tuple for arbitrary dimensions
-        slice_tuple = tuple(slice(1, -1) for _ in range(ndim))
-        sdf_array = padded_sdf_array[slice_tuple]
+    # Remove padding
+    slice_tuple = tuple(slice(1, -1) for _ in range(image.ndim))
+    sdf_array = padded_sdf_array[slice_tuple]
 
     end = time.time()
     print(f"Time taken: {end - start:.4f} seconds")
@@ -98,7 +88,7 @@ def create_sn_graph(
     start = time.time()
 
     spheres_centres = choose_sphere_centres(
-        sdf_array, max_num_vertices, minimal_sphere_radius, ndim
+        sdf_array, max_num_vertices, minimal_sphere_radius
     )
 
     end = time.time()
@@ -113,7 +103,6 @@ def create_sn_graph(
         max_edge_length,
         edge_threshold,
         edge_sphere_threshold,
-        ndim,
     )
     end = time.time()
     print(f"Time taken: {end - start:.4f} seconds")
@@ -197,7 +186,7 @@ def _validate_args(
 
 # First functions to get vertices
 def _sn_graph_distance_vectorized(
-    v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray, ndim: int = 3
+    v_i: np.ndarray, v_j: np.ndarray, sdf_array: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute vectorized version of SN-Graph paper distance between vertices, and a mask of valid distances.
 
@@ -205,7 +194,6 @@ def _sn_graph_distance_vectorized(
         v_i: np.ndarray, shape (N, ndim), coordinates of set of vertices already in the graph
         v_j: np.ndarray, shape (M, ndim), coordinates of candidate vertices
         sdf_array: np.ndarray, signed distance field array
-        ndim: int, number of dimensions (default: 2)
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: distances between vertices, and mask of valid distances
@@ -213,17 +201,8 @@ def _sn_graph_distance_vectorized(
     diff = v_i[:, None, :] - v_j[None, :, :]  # Shape: (N, M, ndim)
     distances = np.sqrt(np.sum(diff**2, axis=2))  # Shape: (N, M)
 
-    # Use ndim argument to determine how to index the array
-    if ndim == 2:
-        sdf_vi = sdf_array[v_i[:, 0], v_i[:, 1]]
-        sdf_vj = sdf_array[v_j[:, 0], v_j[:, 1]]
-    elif ndim == 3:
-        sdf_vi = sdf_array[v_i[:, 0], v_i[:, 1], v_i[:, 2]]
-        sdf_vj = sdf_array[v_j[:, 0], v_j[:, 1], v_j[:, 2]]
-    else:
-        # Fallback for other dimensions
-        sdf_vi = np.array([sdf_array[tuple(coord)] for coord in v_i])
-        sdf_vj = np.array([sdf_array[tuple(coord)] for coord in v_j])
+    sdf_vi = np.array([sdf_array[tuple(coord)] for coord in v_i])
+    sdf_vj = np.array([sdf_array[tuple(coord)] for coord in v_j])
 
     valid_mask = distances > (sdf_vi[:, None] + sdf_vj[None, :])
     final_distances = distances - sdf_vi[:, None] + 2 * sdf_vj[None, :]
@@ -231,10 +210,7 @@ def _sn_graph_distance_vectorized(
 
 
 def _choose_next_sphere(
-    sdf_array: np.ndarray,
-    sphere_centres: list,
-    candidates_sparse: np.ndarray,
-    ndim: int = 3,
+    sdf_array: np.ndarray, sphere_centres: list, candidates_sparse: np.ndarray
 ) -> Tuple[Union[Any, Tuple[int, ...]], np.ndarray]:
     """Choose the next sphere center and return both the center and valid candidates mask.
 
@@ -242,7 +218,6 @@ def _choose_next_sphere(
         sdf_array: np.ndarray, signed distance field array
         sphere_centres: list, existing sphere centers
         candidates_sparse: np.ndarray, candidate points
-        ndim: int, number of dimensions (default: 3)
 
     Returns:
         Tuple containing the next sphere center and valid candidates mask
@@ -257,7 +232,7 @@ def _choose_next_sphere(
 
     # Get distances and validity mask
     distances, valid_mask = _sn_graph_distance_vectorized(
-        sphere_centres, candidates_sparse, sdf_array, ndim
+        sphere_centres, candidates_sparse, sdf_array
     )
 
     # A candidate is only valid if it has valid distances to ALL existing spheres
@@ -278,10 +253,7 @@ def _choose_next_sphere(
 
 
 def choose_sphere_centres(
-    sdf_array: np.ndarray,
-    max_num_vertices: int,
-    minimal_sphere_radius: float,
-    ndim: int = 3,
+    sdf_array: np.ndarray, max_num_vertices: int, minimal_sphere_radius: float
 ) -> list:
     """Choose sphere centers based on SN-graph algorithm. Essentially iteratively applies choose_next_sphere function.
 
@@ -289,7 +261,6 @@ def choose_sphere_centres(
         sdf_array: np.ndarray, signed distance field array
         max_num_vertices: int, maximum number of vertices to generate
         minimal_sphere_radius: float, minimal radius of spheres
-        ndim: int, number of dimensions (default: 3)
 
     Returns:
         list: list of sphere centers as coordinates (tuple of ndim integers)
@@ -318,13 +289,14 @@ def choose_sphere_centres(
     # Convert to sparse coordinates
     candidates_sparse = np.array(np.where(candidates_mask)).T
 
+    # this should be caught by validate args
     if max_num_vertices == -1:
         max_num_vertices = np.inf
 
     i = 0
     while i < max_num_vertices:
         next_centre, valid_candidates = _choose_next_sphere(
-            sdf_array, sphere_centres, candidates_sparse, ndim
+            sdf_array, sphere_centres, candidates_sparse
         )
 
         if next_centre is None:
@@ -343,7 +315,7 @@ def choose_sphere_centres(
 
 # now functions to get edges
 def _edges_mostly_within_object_mask(
-    edges: np.ndarray, edge_threshold: float, sdf_array: np.ndarray, ndim: int = 3
+    edges: np.ndarray, edge_threshold: float, sdf_array: np.ndarray
 ) -> np.ndarray:
     """Check if a sufficient portion of each edge lies within the object.
 
@@ -351,7 +323,6 @@ def _edges_mostly_within_object_mask(
         edges -- array of shape (n_edges, 2, ndim) where each edge is defined by its start and end points
         edge_threshold -- threshold value for how much of edge has to be within the object
         sdf_array -- signed distance field array
-        ndim -- number of dimensions (default: 3)
 
     Returns:
         np.ndarray -- Boolean array of shape (n_edges,)
@@ -373,21 +344,19 @@ def _edges_mostly_within_object_mask(
     return is_mostly_within
 
 
-def _points_intervals_distances(
-    points: np.ndarray, edges: np.ndarray, ndim: int = 3
-) -> np.ndarray:
+def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.ndarray:
     """Calculate distances from each point to each edge.
 
     Arguments:
         points -- array of shape (n_points, ndim)
         edges -- array of shape (n_edges, 2, ndim) where each edge is defined by start and end points
-        ndim -- number of dimensions (default: 3)
 
     Returns:
         np.ndarray -- array of shape (n_points, n_edges) containing distances
     """
     n_points = points.shape[0]
     n_edges = edges.shape[0]
+    ndim = points.shape[1]
 
     # Reshape arrays for broadcasting
     p = points.reshape(n_points, 1, ndim)
@@ -435,7 +404,6 @@ def _edges_not_too_close_to_many_spheres_mask(
     spheres_centres_array: np.ndarray,
     sdf_array: np.ndarray,
     edge_sphere_threshold: float,
-    ndim: int = 3,
 ) -> np.ndarray:
     """Determine which edges are not too close to more than 2 sphere (Every edge is intersecting 2 spheres at least which are its endpoints).
 
@@ -444,7 +412,6 @@ def _edges_not_too_close_to_many_spheres_mask(
         spheres_centres_array -- array of shape (n_spheres, ndim)
         sdf_array -- signed distance field array
         edge_sphere_threshold -- threshold for edge closeness to spheres
-        ndim -- number of dimensions (default: 3)
 
     Returns:
         np.ndarray -- Boolean array of shape (n_edges,)
@@ -455,30 +422,16 @@ def _edges_not_too_close_to_many_spheres_mask(
 
     # Calculate distances between all sphere centers and all edges
     distances = _points_intervals_distances(
-        spheres_centres_array, edges, ndim
+        spheres_centres_array, edges
     )  # Shape: (n_spheres, n_edges)
 
-    # Calculate thresholds for each sphere based on SDF values
-    # For 3D we need to use tuple indexing
-    if ndim == 2:
-        sphere_coords = spheres_centres_array.T.astype(int)  # Shape: (2, n_spheres)
-        thresholds = (
-            edge_sphere_threshold * sdf_array[sphere_coords[0], sphere_coords[1]]
-        )  # Shape: (n_spheres,)
-    elif ndim == 3:
-        sphere_coords = spheres_centres_array.T.astype(int)  # Shape: (3, n_spheres)
-        thresholds = (
-            edge_sphere_threshold
-            * sdf_array[sphere_coords[0], sphere_coords[1], sphere_coords[2]]
-        )  # Shape: (n_spheres,)
-    else:
-        # For other dimensions, use tuple indexing
-        thresholds = np.array(
-            [
-                edge_sphere_threshold * sdf_array[tuple(coord.astype(int))]
-                for coord in spheres_centres_array
-            ]
-        )
+    # For other dimensions, use tuple indexing
+    thresholds = np.array(
+        [
+            edge_sphere_threshold * sdf_array[tuple(coord.astype(int))]
+            for coord in spheres_centres_array
+        ]
+    )
 
     # Compare distances with thresholds
     close_mask = distances < thresholds[:, np.newaxis]  # Shape: (n_spheres, n_edges)
@@ -498,7 +451,6 @@ def determine_edges(
     max_edge_length: float,
     edge_threshold: float,
     edge_sphere_threshold: float,
-    ndim: int = 3,
 ) -> list:
     """Determine valid edges between sphere centers.
 
@@ -508,7 +460,6 @@ def determine_edges(
         max_edge_length -- maximum allowed edge length
         edge_threshold -- threshold for edge being within object
         edge_sphere_threshold -- threshold for edge closeness to spheres
-        ndim -- number of dimensions (default: 3)
 
     Returns:
         list -- list containing valid edges
@@ -537,13 +488,13 @@ def determine_edges(
 
     # Filter by being within object
     within_object_mask = _edges_mostly_within_object_mask(
-        edges, edge_threshold, sdf_array, ndim
+        edges, edge_threshold, sdf_array
     )
     edges = edges[within_object_mask]
 
     # Filter by closeness to too many spheres
     not_too_close_mask = _edges_not_too_close_to_many_spheres_mask(
-        edges, spheres_centres_array, sdf_array, edge_sphere_threshold, ndim
+        edges, spheres_centres_array, sdf_array, edge_sphere_threshold
     )
     valid_edges = edges[not_too_close_mask]
 
