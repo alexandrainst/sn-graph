@@ -25,7 +25,7 @@ img = np.zeros((100, 100))
 img[40:60, 40:60] = 1  # Create a square region
 
 # Generate the SN graph
-centers, edges = sn.create_SN_graph(
+centers, edges = sn.create_sn_graph(
     img,
     max_num_vertices=10,
     edge_threshold=1.0
