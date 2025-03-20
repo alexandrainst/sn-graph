@@ -25,13 +25,8 @@ def test_nd_volume() -> None:
 
         vertices, _ = sn_graph
 
-        # assert len(vertices) >= 1, "The graph should have at least one vertex"
-        # assert isinstance(vertices[0], tuple), "The vertex should be a tuple"
-        # assert (
-        #     len(vertices[0]) == n
-        # ), "The vertex should have the same number of dimensions as the input array"
-        # assert set(
-        #     vertices[0]
-        # ).issubset(
-        #     {24, 25}
-        # ), "The first vertex should be in the middle of the cube, so its coordinates should be ((10+39)/2)= (24 or 25), in every dimension"
+        assert len(vertices) >= 1
+        assert isinstance(vertices[0], tuple)
+        assert len(vertices[0]) == n
+        # The first vertex should be in the middle of the cube, so its coordinates should be ((10+39)/2)= (24 or 25), in every dimension.
+        assert set(vertices[0]).issubset({24, 25})
