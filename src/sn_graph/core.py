@@ -124,6 +124,12 @@ def _validate_args(
     assert isinstance(
         image, np.ndarray
     ), f"input must be a numpy array, got {type(image)}"
+    image = np.squeeze(image)
+    if image.ndim > 3:
+        warnings.warn(
+            f"Running algorithm on an input of high dimension. Input dimension: {image.ndim}",
+            RuntimeWarning,
+        )
     assert isinstance(
         max_num_vertices, int
     ), f"max_num_vertices must be integer, got {type(max_num_vertices)}"
@@ -142,12 +148,6 @@ def _validate_args(
     assert isinstance(
         return_sdf, bool
     ), f"return_sdf must be boolean, got {type(return_sdf)}"
-
-    image = np.squeeze(image)
-    assert (
-        image.ndim == 2 or image.ndim == 3
-    ), f"input image must be 2D or 3D, received shape {image.shape} (after squeezing)"
-
     assert (
         max_num_vertices == -1 or max_num_vertices >= 0
     ), f"max_num_vertices must be -1 or non-negative, got {max_num_vertices}"
