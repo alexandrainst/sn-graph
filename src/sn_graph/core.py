@@ -356,7 +356,7 @@ def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.nda
     ndim = points.shape[1]
 
     # Reshape arrays for broadcasting
-    p = points.reshape(n_points, 1, ndim)  # points to be proejcted on edges
+    p = points.reshape(n_points, 1, ndim)  # points to be projected on edges
     a = edges[:, 0].reshape(1, n_edges, ndim)  # edge starts
     b = edges[:, 1].reshape(1, n_edges, ndim)  # edge ends
 
