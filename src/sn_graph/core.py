@@ -289,10 +289,6 @@ def choose_sphere_centres(
     # Convert to sparse coordinates
     candidates_sparse = np.array(np.where(candidates_mask)).T
 
-    # this should be caught by validate args
-    if max_num_vertices == -1:
-        max_num_vertices = np.inf
-
     i = 0
     while i < max_num_vertices:
         next_centre, valid_candidates = _choose_next_sphere(
