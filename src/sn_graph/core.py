@@ -373,7 +373,7 @@ def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.nda
         ba_length_squared + 1e-10
     )  # Shape: (n_points, n_edges, 1)
 
-    # Create masks and comute distance for three possible cases
+    # Create masks and compute distances for three possible cases
 
     # p is projected before the start of the edge
     mask_before = t <= 0
