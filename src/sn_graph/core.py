@@ -346,6 +346,7 @@ def _edges_mostly_within_object_mask(
 
 def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.ndarray:
     """Calculate distances from each point to each edge.
+    The algorithm uses a classical lienar alegbra formula for otrhogonally projecting one vector onto another. Based on whether the proejction falls within the edge or outside of it, the distance in question is the distance to one of the endpoints, or distance to the projection.
 
     Arguments:
         points -- array of shape (n_points, ndim)
@@ -359,9 +360,9 @@ def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.nda
     ndim = points.shape[1]
 
     # Reshape arrays for broadcasting
-    p = points.reshape(n_points, 1, ndim)
-    a = edges[:, 0].reshape(1, n_edges, ndim)
-    b = edges[:, 1].reshape(1, n_edges, ndim)
+    p = points.reshape(n_points, 1, ndim)  # points to be proejcted on edges
+    a = edges[:, 0].reshape(1, n_edges, ndim)  # edge starts
+    b = edges[:, 1].reshape(1, n_edges, ndim)  # edge ends
 
     ba = b - a  # Shape: (1, n_edges, ndim)
     ba_length_squared = np.sum(ba**2, axis=2, keepdims=True)  # Shape: (1, n_edges, 1)
@@ -376,17 +377,25 @@ def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.nda
         ba_length_squared + 1e-10
     )  # Shape: (n_points, n_edges, 1)
 
-    # Create masks for different conditions
+    # Create masks and comute distance for three possible cases
+
+    # p is projected before the start of the edge
     mask_before = t <= 0
+    d_before = np.linalg.norm(
+        pa, axis=2
+    )  # Distance to start point is the distance to the edge
+
+    # p is projected after the end of the edge
     mask_after = t >= 1
+    d_after = np.linalg.norm(
+        p - b, axis=2
+    )  # Distance to end point is the distance to the edge
 
-    # Calculate distances for each case
-    d_before = np.linalg.norm(pa, axis=2)  # Distance to start point
-    d_after = np.linalg.norm(p - b, axis=2)  # Distance to end point
-
-    # Project points onto lines
+    # Project points onto the edges
     h = a + t * ba
-    d_between = np.linalg.norm(p - h, axis=2)
+    d_between = np.linalg.norm(
+        p - h, axis=2
+    )  # Distance to h (the proejction) is the distance to the edge
 
     # Combine results based on masks
     distances = np.where(
