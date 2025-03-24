@@ -342,7 +342,7 @@ def _edges_mostly_within_object_mask(
 
 def _points_intervals_distances(points: np.ndarray, edges: np.ndarray) -> np.ndarray:
     """Calculate distances from each point to each edge.
-    The algorithm uses a classical lienar alegbra formula for otrhogonally projecting one vector onto another. Based on whether the proejction falls within the edge or outside of it, the distance in question is the distance to one of the endpoints, or distance to the projection.
+    The algorithm uses a classical linear alegbra formula for orthogonally projecting one vector onto another. Based on whether the projection falls within the edge or outside of it, the distance in question is the distance to one of the endpoints, or the distance to the projection.
 
     Arguments:
         points -- array of shape (n_points, ndim)
