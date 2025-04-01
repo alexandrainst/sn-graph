@@ -1,6 +1,6 @@
 # SN-Graph: a graph skeletonisation algorithm.
 
-A Python implementation of an SN-Graph skeletonisation algorithm. Based on the article *SN-Graph: a Minimalist 3D Object Representation for Classification* [arXiv:2105.14784](https://arxiv.org/abs/2105.14784). Currently works only for 2D images.
+A Python implementation of an SN-Graph skeletonisation algorithm. Based on the article *SN-Graph: a Minimalist 3D Object Representation for Classification* [arXiv:2105.14784](https://arxiv.org/abs/2105.14784).
 
 
 ![Example of a binary image and the skeletal graph](/assets/horse_graph.png "SN-graph generated out of an scikit-image's horse image.")
@@ -25,7 +25,7 @@ img = np.zeros((100, 100))
 img[40:60, 40:60] = 1  # Create a square region
 
 # Generate the SN graph
-centers, edges = sn.create_SN_graph(
+centers, edges = sn.create_sn_graph(
     img,
     max_num_vertices=10,
     edge_threshold=1.0
