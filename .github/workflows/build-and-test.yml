@@ -34,7 +34,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction #--no-root
       - name: Lint project
         run: poetry run black --check . && poetry run isort -c .
       - name: Test project
