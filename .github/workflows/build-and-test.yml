@@ -38,4 +38,4 @@ jobs:
       - name: Lint project
         run: poetry run black --check . && poetry run isort -c .
       - name: Test project
-        run: poetry run pytest /tests/
+        run: poetry run pytest /tests
