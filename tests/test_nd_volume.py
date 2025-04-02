@@ -1,6 +1,8 @@
+from typing import Callable
+
 import numpy as np
 import pytest
-from typing import Callable
+
 import sn_graph as sn
 
 

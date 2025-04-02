@@ -1,9 +1,10 @@
+import time
+import warnings
+from typing import Any, Tuple, Union
+
 import numpy as np
 import skfmm
 from skimage.draw import line_nd
-from typing import Tuple, Union, Any
-import warnings
-import time
 
 
 def create_sn_graph(

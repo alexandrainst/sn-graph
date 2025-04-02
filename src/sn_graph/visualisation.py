@@ -1,6 +1,7 @@
-import numpy as np
 from typing import Optional
-from skimage.draw import line, circle_perimeter, line_nd
+
+import numpy as np
+from skimage.draw import circle_perimeter, line, line_nd
 
 
 def draw_sn_graph(
