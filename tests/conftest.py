@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # Add the parent directory to the Python path
 # This makes the main package importable in the tests
