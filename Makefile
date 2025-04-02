@@ -2,6 +2,8 @@ PROJECT_NAME := sn_graph
 SRC_DIR := $(CURDIR)/src
 TESTS_DIR := $(CURDIR)/tests
 TEST_REPORTS_DIR := $(CURDIR)/test-reports
+DOCS_DIR := $(CURDIR)/docs
+
 
 activate:
 	@echo "Activating virtual environment..."
@@ -33,3 +35,9 @@ test:  ## Run all tests
 .DEFAULT_GOAL := help
 help: Makefile
 	@grep -E '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[
+
+
+documentation:
+	@echo "Generating documentation..."
+	@poetry run sphinx-apidoc --module-first -f -o $(DOCS_DIR)/source/ $(SRC_DIR)/sn_graph/
+	@cd docs && make html
