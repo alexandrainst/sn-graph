@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: [ 'self-hosted', 'linux', 'x64' ]
+    runs-on: [ 'self-hosted-latest' ]
     steps:
       - uses: actions/checkout@v3
         with:
