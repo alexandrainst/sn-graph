@@ -1,6 +1,20 @@
 # SN-Graph: a graph skeletonisation algorithm.
 
+
+
+<div align="center">
+
+[![build](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml)
+[![License](https://img.shields.io/github/license/alexandrainst/sn-graph)](https://github.com/alexandrainst/sn-graph/blob/main/LICENSE)
+
+</div>
+
+
+
+
 A Python implementation of an SN-Graph skeletonisation algorithm. Based on the article *SN-Graph: a Minimalist 3D Object Representation for Classification* [arXiv:2105.14784](https://arxiv.org/abs/2105.14784).
+
+
 
 
 ![Example of a binary image and the skeletal graph](/assets/horse_graph.png "SN-graph generated out of an scikit-image's horse image.")
