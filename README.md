@@ -53,11 +53,7 @@ graph_image=sn.draw_sn_graph(centers, edges, sdf_array, background_image=img)
 plt.imshow(graph_image)
 plt.show()
 ```
-<img src="assets/square_readme.png" alt="SN-Graph drawn on top of the square" width="500">
-
-<!-- ![SN-Graph drawn on top of the square](https://raw.githubusercontent.com/alexandrainst/sn-graph/main/assets/square_readme.png)-->
-
-
+<img src="https://raw.githubusercontent.com/alexandrainst/sn-graph/main/assets/square_readme.png" alt="SN-Graph drawn on top of the square" width="500">
 
 ## Key Parameters
 
@@ -66,7 +62,7 @@ plt.show()
 - `edge_threshold`: Threshold for determining what portion of an edge must be contained within the shape
 - `minimal_sphere_radius`: Minimum radius allowed for spheres
 - `edge_sphere_threshold`: Threshold value for deciding how close can an edge be to a non-enpdpoint spheres
-- `return_sdf`: Whether to return signed distance field array computed by the algorithm. Neccessary to extract radii of spheres.
+- `return_sdf`: Whether to return signed distance field array computed by the algorithm (neccessary to extract radii of spheres)
 
 ## Authors
 - Tomasz Prytuła (<tomasz.prytula@alexandra.dk>)
