@@ -53,8 +53,8 @@ graph_image=sn.draw_sn_graph(centers, edges, sdf_array, background_image=img)
 plt.imshow(graph_image)
 plt.show()
 ```
+<img src="assets/square_readme.png" alt="SN-Graph drawn on top of the square" width="500">
 
-![SN-Graph drawn on top of the square](assets/square_readme.png )
 <!-- ![SN-Graph drawn on top of the square](https://raw.githubusercontent.com/alexandrainst/sn-graph/main/assets/square_readme.png)-->
 
 
