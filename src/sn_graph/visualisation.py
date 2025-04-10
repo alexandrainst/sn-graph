@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Optional
-from skimage.draw import line, circle_perimeter, line_nd
+from skimage.draw import line_nd
 
 
 def draw_sn_graph(
@@ -23,9 +23,6 @@ def draw_sn_graph(
     Returns:
         np.ndarray: the image/volume (or blank background) with the graph drawn on it.
     """
-    # Determine dimensionality based on sdf_array
-    ndim = sdf_array.ndim
-
     if background_image is not None:
         assert (
             background_image.shape == sdf_array.shape
@@ -39,54 +36,23 @@ def draw_sn_graph(
 
     # Draw edges
     for edge in edges:
-        if ndim == 2:
-            pixels = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
-            img[pixels] = 2
-        else:  # 3D or higher
-            # Use line_nd for higher dimensions
-            start = np.array(edge[0])
-            end = np.array(edge[1])
-            pixels = line_nd(start, end)
+        start = np.array(edge[0])
+        end = np.array(edge[1])
+        pixels = line_nd(start, end)
 
-            # Create a valid indexing tuple
-            valid_indices = []
-            for i in range(len(pixels)):
-                mask = (pixels[i] >= 0) & (pixels[i] < sdf_array.shape[i])
-                valid_indices.append(mask)
+        img[pixels] = 2
 
-            valid_mask = np.all(np.stack(valid_indices, axis=0), axis=0)
-
-            # Only use valid pixel coordinates
-            pixel_indices = tuple(p[valid_mask] for p in pixels)
-            if pixel_indices[0].size > 0:
-                img[pixel_indices] = 2
-
-    # If no sdf_array given or draw_circles is False, don't draw spheres
+    # If draw_circles is False, don't draw spheres
     if not draw_circles:
         return img
 
     # Draw spheres
     for center in spheres_centres:
-        if ndim == 2:
-            # For 2D, use circle_perimeter
-            center_tuple = tuple(int(c) for c in center)
-            radius = int(np.ceil(sdf_array[center_tuple]))
-            circle_coords = circle_perimeter(
-                center_tuple[0], center_tuple[1], radius, shape=img.shape
-            )
-            img[circle_coords] = 4
-        else:  # 3D or higher
-            # For 3D, draw sphere surface
-            center_array = np.array(center)
-            radius = int(np.ceil(sdf_array[tuple(center_array.astype(int))]))
+        radius = int(np.ceil(sdf_array[center]))
+        center_array = np.array(center)
+        sphere_coords = generate_sphere_surface(center_array, radius, sdf_array.shape)
 
-            # Generate sphere surface using a more efficient algorithm
-            sphere_coords = generate_sphere_surface(
-                center_array, radius, sdf_array.shape
-            )
-
-            if sphere_coords[0].size > 0:
-                img[sphere_coords] = 4
+        img[sphere_coords] = 4
 
     return img
 
