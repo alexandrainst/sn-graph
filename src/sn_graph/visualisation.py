@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Optional
 from skimage.draw import line_nd
+import trimesh
 
 
 def draw_sn_graph(
@@ -98,3 +99,54 @@ def generate_sphere_surface(center: np.ndarray, radius: int, shape: tuple) -> tu
     else:
         # Return empty arrays with proper shape if no points match
         return tuple(np.array([], dtype=int) for _ in range(len(center)))
+
+
+def visualize_3d_graph(
+    vertices: list, edges: list, sdf_array: np.ndarray, draw_spheres: bool = True
+) -> trimesh.scene.scene.Scene:
+    """
+    Visualize a graph with vertices, edges, and  spheres
+
+    Parameters:
+    -----------
+    vertices : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+    edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+    sdf_array : array that can be queried at vertex coordinates to get radius
+
+    Returns:
+    --------
+    scene : trimesh.Scene
+        A 3D scene containing the graph visualization.
+    """
+    # Create a scene
+    scene = trimesh.Scene()
+
+    if draw_spheres:
+        # Add spheres and vertex points for each vertex
+        for v in vertices:
+            # Get radius from SDF array
+            radius = sdf_array[tuple(v)]
+
+            # Create a smooth sphere based on SDF value
+            sphere = trimesh.creation.icosphere(radius=radius, subdivisions=2)
+            sphere.visual.vertex_colors = [255, 0, 0, 150]  # Red
+            sphere.apply_translation(v)
+            scene.add_geometry(sphere)
+
+            # Add small vertex points
+            point = trimesh.creation.icosphere(radius=0.1)
+            point.visual.face_colors = [0, 0, 255, 255]
+            point.apply_translation(v)
+            scene.add_geometry(point)
+
+    # Add edges directly as line segments - blue and thick
+    for start_coord, end_coord in edges:
+        # Create a line segment between start and end
+        line = trimesh.creation.cylinder(
+            radius=0.05,  # Thick lines
+            segment=[start_coord, end_coord],
+        )
+        line.visual.vertex_colors = [0, 0, 255, 255]  # Blue
+        scene.add_geometry(line)
+
+    return scene
