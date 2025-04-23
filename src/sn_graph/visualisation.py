@@ -9,7 +9,7 @@ def draw_sn_graph(
     edges: list,
     sdf_array: np.ndarray,
     background_image: Optional[np.ndarray] = None,
-    draw_circles: bool = True,
+    draw_spheres: bool = True,
 ) -> np.ndarray:
     """
     Draw a graph of spheres and edges on an image/volume.
@@ -19,7 +19,7 @@ def draw_sn_graph(
         edges: list of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
         sdf_array: np.ndarray, the signed distance function array.
         background_image: optional(np.ndarray), the image/volume on which to draw the graph.
-        draw_circles: bool, whether to draw the circles/spheres around the sphere centers.
+        draw_spheres: bool, whether to draw the circles/spheres around the sphere centers.
 
     Returns:
         np.ndarray: the image/volume (or blank background) with the graph drawn on it.
@@ -43,8 +43,8 @@ def draw_sn_graph(
 
         img[pixels] = 2
 
-    # If draw_circles is False, don't draw spheres
-    if not draw_circles:
+    # If draw_spheres is False, don't draw spheres
+    if not draw_spheres:
         return img
 
     # Draw spheres
