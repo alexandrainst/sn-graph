@@ -35,9 +35,13 @@ def draw_sn_graph(
     elif sdf_array is not None:
         img = np.zeros(sdf_array.shape)
     else:
-        # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
-        shape = np.max(np.array(spheres_centres) + 10, axis=0)
-        img = np.zeros(shape)
+        if not spheres_centres:
+            # If no spheres and no background image, return an empty array
+            return np.array([])
+        else:
+            # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
+            shape = np.max(np.array(spheres_centres) + 10, axis=0)
+            img = np.zeros(shape)
 
     # Draw edges
     for edge in edges:
