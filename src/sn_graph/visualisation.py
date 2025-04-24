@@ -109,7 +109,7 @@ def visualize_3d_graph(
     spheres_centres: list, edges: list, sdf_array: Optional[np.ndarray] = None
 ) -> trimesh.scene.scene.Scene:
     """
-    Visualize a graph with vertices, edges, and  spheres
+    Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.
 
     Args:
         spheres_centres : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
