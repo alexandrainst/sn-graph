@@ -7,9 +7,8 @@ import trimesh
 def draw_sn_graph(
     spheres_centres: list,
     edges: list,
-    sdf_array: np.ndarray,
+    sdf_array: Optional[np.ndarray] = None,
     background_image: Optional[np.ndarray] = None,
-    draw_spheres: bool = True,
 ) -> np.ndarray:
     """
     Draw a graph of spheres and edges on an image/volume.
@@ -17,23 +16,28 @@ def draw_sn_graph(
     Args:
         spheres_centres: list of tuples, each tuple contains coordinates of a sphere's centre.
         edges: list of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
-        sdf_array: np.ndarray, the signed distance function array.
-        background_image: optional(np.ndarray), the image/volume on which to draw the graph.
-        draw_spheres: bool, whether to draw the circles/spheres around the sphere centers.
+        sdf_array: optional(np.ndarray), the signed distance function array, if not provided no spheres will be drawn
+        background_image: optional(np.ndarray), the image/volume on which to draw the graph
 
     Returns:
         np.ndarray: the image/volume (or blank background) with the graph drawn on it.
     """
-    if background_image is not None:
-        assert (
-            background_image.shape == sdf_array.shape
-        ), "background_image must have the same shape as sdf_array"
 
-    img = (
-        background_image.copy()
-        if background_image is not None
-        else np.zeros(sdf_array.shape)
-    )
+    # Check dimensions consistency
+    if sdf_array is not None and background_image is not None:
+        if sdf_array.shape != background_image.shape:
+            raise ValueError(
+                f"Dimension mismatch: sdf_array shape {sdf_array.shape} doesn't match background_image shape {background_image.shape}"
+            )
+
+    if background_image is not None:
+        img = background_image.copy()
+    elif sdf_array is not None:
+        img = np.zeros(sdf_array.shape)
+    else:
+        # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
+        shape = np.max(np.array(spheres_centres) + 10, axis=0)
+        img = np.zeros(shape)
 
     # Draw edges
     for edge in edges:
@@ -43,8 +47,8 @@ def draw_sn_graph(
 
         img[pixels] = 2
 
-    # If draw_spheres is False, don't draw spheres
-    if not draw_spheres:
+    # If no sdf_array is provided, return the image with edges only
+    if sdf_array is None:
         return img
 
     # Draw spheres
@@ -102,28 +106,27 @@ def generate_sphere_surface(center: np.ndarray, radius: int, shape: tuple) -> tu
 
 
 def visualize_3d_graph(
-    vertices: list, edges: list, sdf_array: np.ndarray, draw_spheres: bool = True
+    spheres_centres: list, edges: list, sdf_array: Optional[np.ndarray] = None
 ) -> trimesh.scene.scene.Scene:
     """
     Visualize a graph with vertices, edges, and  spheres
 
-    Parameters:
-    -----------
-    vertices : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
-    edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
-    sdf_array : array that can be queried at vertex coordinates to get radius
+    Args:
+        spheres_centres : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+        edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+        sdf_array : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
 
     Returns:
-    --------
+
     scene : trimesh.Scene
         A 3D scene containing the graph visualization.
     """
     # Create a scene
     scene = trimesh.Scene()
 
-    if draw_spheres:
+    if sdf_array is not None:
         # Add spheres and vertex points for each vertex
-        for v in vertices:
+        for v in spheres_centres:
             # Get radius from SDF array
             radius = sdf_array[tuple(v)]
 
