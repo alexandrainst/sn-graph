@@ -5,6 +5,8 @@
 <div align="center">
 
 [![build](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml)
+[![PyPI - Version](https://img.shields.io/pypi/v/sn-graph)](https://pypi.org/project/sn-graph/)
+
 [![License](https://img.shields.io/github/license/alexandrainst/sn-graph)](https://github.com/alexandrainst/sn-graph/blob/main/LICENSE)
 
 </div>
