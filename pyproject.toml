@@ -68,7 +68,7 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing"
+addopts = "--cov=sn_graph --cov-report=term-missing"
 testpaths = ["tests"]
 
 [tool.coverage.run]
