@@ -37,13 +37,16 @@ def test_volumetric_visualisation(
     # Basic assertion
     assert isinstance(graph_image, np.ndarray)
 
-    # Check for expected values only
-    assert np.all(
-        np.isin(graph_image, expected_values)
-    ), f"Graph image contains unexpected values, expected only {expected_values}"
+    # Check that all expected values are present in graph_image
+    unique_values = np.unique(graph_image)
+    for expected_value in expected_values:
+        assert expected_value in unique_values, f"Expected value {expected_value} is not present in graph_image"
+
+    # Check that graph_image doesn't contain anything else but expected values
     assert not np.any(
         np.isin(graph_image, list(set([0, 1, 2, 4]) - set(expected_values)))
     ), "Graph image contains values that should not be present"
+
 
     # Check shape if return_sdf or include_background
     if return_sdf or include_background:
