@@ -7,15 +7,11 @@ import sn_graph as sn
 import trimesh
 
 
+# fmt: off
 @pytest.mark.parametrize(
     "dim, return_sdf, include_background, expected_values",
     [
-        (
-            2,
-            True,
-            True,
-            [0, 1, 2, 4],
-        ),  # All features enabled, expecting 0 (background), 1 (background_image), 2 (edges), and 4 (spheres)
+        (2, True, True, [0, 1, 2, 4]),  # All features enabled, expecting 0 (background), 1 (background_image), 2 (edges), and 4 (spheres)
         (2, True, False, [0, 2, 4]),  # No background_image
         (2, False, True, [0, 1, 2]),  # No spheres
         (2, False, False, [0, 2]),  # Minimal features, only background and edges
@@ -23,7 +19,7 @@ import trimesh
         (3, True, False, [0, 2, 4]),
         (3, False, True, [0, 1, 2]),
         (3, False, False, [0, 2]),
-    ],
+    ]
 )  # type: ignore[misc]
 def test_volumetric_visualisation(
     dim: int,
