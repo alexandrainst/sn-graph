@@ -2,9 +2,9 @@ from typing import Callable
 
 import numpy as np
 import pytest
+import trimesh
 
 import sn_graph as sn
-import trimesh
 
 
 # fmt: off
