@@ -5,6 +5,8 @@ description = "A Python implementation of SN-Graph algorithm."
 authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/alexandrainst/sn-graph"
+homepage = "https://github.com/alexandrainst/sn-graph"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,6 +14,7 @@ numpy = "2.0"
 matplotlib = "^3.9.3"
 scikit-image = "^0.24.0"
 scikit-fmm = "^2024.9.16"
+trimesh = "^4.6.8"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -27,7 +27,7 @@ poetry add sn-graph
 
 ## Basic Usage
 
-See notebooks [demo_sn-graph](notebooks/demo_sn-graph.ipynb) and [3d_demo](notebooks/3D_demo.ipynb) for 2D and 3D demo, respectively. Notebook [mnist_classification](notebooks/mnist_classification.ipynb) has some good stuff too!
+See notebooks [demo_sn-graph](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/demo_sn-graph.ipynb) and [3d_demo](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/3D_demo.ipynb) for 2D and 3D demo, respectively. Notebook [mnist_classification](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/mnist_classification.ipynb) has some good stuff too!
 
 ```python
 import numpy as np

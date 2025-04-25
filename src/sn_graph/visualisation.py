@@ -1,14 +1,14 @@
 import numpy as np
 from typing import Optional
-from skimage.draw import line, circle_perimeter, line_nd
+from skimage.draw import line_nd
+import trimesh
 
 
 def draw_sn_graph(
     spheres_centres: list,
     edges: list,
-    sdf_array: np.ndarray,
+    sdf_array: Optional[np.ndarray] = None,
     background_image: Optional[np.ndarray] = None,
-    draw_circles: bool = True,
 ) -> np.ndarray:
     """
     Draw a graph of spheres and edges on an image/volume.
@@ -16,77 +16,52 @@ def draw_sn_graph(
     Args:
         spheres_centres: list of tuples, each tuple contains coordinates of a sphere's centre.
         edges: list of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
-        sdf_array: np.ndarray, the signed distance function array.
-        background_image: optional(np.ndarray), the image/volume on which to draw the graph.
-        draw_circles: bool, whether to draw the circles/spheres around the sphere centers.
+        sdf_array: optional(np.ndarray), the signed distance function array, if not provided no spheres will be drawn
+        background_image: optional(np.ndarray), the image/volume on which to draw the graph
 
     Returns:
         np.ndarray: the image/volume (or blank background) with the graph drawn on it.
     """
-    # Determine dimensionality based on sdf_array
-    ndim = sdf_array.ndim
+
+    # Check dimensions consistency
+    if sdf_array is not None and background_image is not None:
+        if sdf_array.shape != background_image.shape:
+            raise ValueError(
+                f"Dimension mismatch: sdf_array shape {sdf_array.shape} doesn't match background_image shape {background_image.shape}"
+            )
 
     if background_image is not None:
-        assert (
-            background_image.shape == sdf_array.shape
-        ), "background_image must have the same shape as sdf_array"
-
-    img = (
-        background_image.copy()
-        if background_image is not None
-        else np.zeros(sdf_array.shape)
-    )
+        img = background_image.copy()
+    elif sdf_array is not None:
+        img = np.zeros(sdf_array.shape)
+    else:
+        if not spheres_centres:
+            # If no spheres and no background image, return an empty array
+            return np.array([])
+        else:
+            # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
+            shape = np.max(np.array(spheres_centres) + 10, axis=0)
+            img = np.zeros(shape)
 
     # Draw edges
     for edge in edges:
-        if ndim == 2:
-            pixels = line(edge[0][0], edge[0][1], edge[1][0], edge[1][1])
-            img[pixels] = 2
-        else:  # 3D or higher
-            # Use line_nd for higher dimensions
-            start = np.array(edge[0])
-            end = np.array(edge[1])
-            pixels = line_nd(start, end)
+        start = np.array(edge[0])
+        end = np.array(edge[1])
+        pixels = line_nd(start, end)
 
-            # Create a valid indexing tuple
-            valid_indices = []
-            for i in range(len(pixels)):
-                mask = (pixels[i] >= 0) & (pixels[i] < sdf_array.shape[i])
-                valid_indices.append(mask)
+        img[pixels] = 2
 
-            valid_mask = np.all(np.stack(valid_indices, axis=0), axis=0)
-
-            # Only use valid pixel coordinates
-            pixel_indices = tuple(p[valid_mask] for p in pixels)
-            if pixel_indices[0].size > 0:
-                img[pixel_indices] = 2
-
-    # If no sdf_array given or draw_circles is False, don't draw spheres
-    if not draw_circles:
+    # If no sdf_array is provided, return the image with edges only
+    if sdf_array is None:
         return img
 
     # Draw spheres
     for center in spheres_centres:
-        if ndim == 2:
-            # For 2D, use circle_perimeter
-            center_tuple = tuple(int(c) for c in center)
-            radius = int(np.ceil(sdf_array[center_tuple]))
-            circle_coords = circle_perimeter(
-                center_tuple[0], center_tuple[1], radius, shape=img.shape
-            )
-            img[circle_coords] = 4
-        else:  # 3D or higher
-            # For 3D, draw sphere surface
-            center_array = np.array(center)
-            radius = int(np.ceil(sdf_array[tuple(center_array.astype(int))]))
+        radius = int(np.ceil(sdf_array[center]))
+        center_array = np.array(center)
+        sphere_coords = generate_sphere_surface(center_array, radius, sdf_array.shape)
 
-            # Generate sphere surface using a more efficient algorithm
-            sphere_coords = generate_sphere_surface(
-                center_array, radius, sdf_array.shape
-            )
-
-            if sphere_coords[0].size > 0:
-                img[sphere_coords] = 4
+        img[sphere_coords] = 4
 
     return img
 
@@ -132,3 +107,53 @@ def generate_sphere_surface(center: np.ndarray, radius: int, shape: tuple) -> tu
     else:
         # Return empty arrays with proper shape if no points match
         return tuple(np.array([], dtype=int) for _ in range(len(center)))
+
+
+def visualize_3d_graph(
+    spheres_centres: list, edges: list, sdf_array: Optional[np.ndarray] = None
+) -> trimesh.scene.scene.Scene:
+    """
+    Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.
+
+    Args:
+        spheres_centres : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+        edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+        sdf_array : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
+
+    Returns:
+
+    scene : trimesh.Scene
+        A 3D scene containing the graph visualization.
+    """
+    # Create a scene
+    scene = trimesh.Scene()
+
+    if sdf_array is not None:
+        # Add spheres and vertex points for each vertex
+        for v in spheres_centres:
+            # Get radius from SDF array
+            radius = sdf_array[tuple(v)]
+
+            # Create a smooth sphere based on SDF value
+            sphere = trimesh.creation.icosphere(radius=radius, subdivisions=2)
+            sphere.visual.vertex_colors = [255, 0, 0, 150]  # Red
+            sphere.apply_translation(v)
+            scene.add_geometry(sphere)
+
+            # Add small vertex points
+            point = trimesh.creation.icosphere(radius=0.1)
+            point.visual.face_colors = [0, 0, 255, 255]
+            point.apply_translation(v)
+            scene.add_geometry(point)
+
+    # Add edges directly as line segments - blue and thick
+    for start_coord, end_coord in edges:
+        # Create a line segment between start and end
+        line = trimesh.creation.cylinder(
+            radius=0.05,  # Thick lines
+            segment=[start_coord, end_coord],
+        )
+        line.visual.vertex_colors = [0, 0, 255, 255]  # Blue
+        scene.add_geometry(line)
+
+    return scene
