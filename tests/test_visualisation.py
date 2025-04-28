@@ -21,7 +21,7 @@ import sn_graph as sn
         (3, False, False, [0, 2]),
     ]
 )  # type: ignore[misc]
-def test_volumetric_visualisation(
+def test_draw_sn_graph_draws_valid_image_for_valid_input(
     dim: int,
     return_sdf: bool,
     include_background: bool,
@@ -55,7 +55,7 @@ def test_volumetric_visualisation(
         ), f"Graph image shape {graph_image.shape} should match input image shape {img.shape}"
 
 
-def test_small_graph(make_one_edge_graph: Callable[[], tuple]) -> None:
+def test_draw_sn_graph_draws_valid_image_for_small_graph(make_one_edge_graph: Callable[[], tuple]) -> None:
     vertices, edges = make_one_edge_graph()
     graph_image = sn.draw_sn_graph(vertices, edges)
 
@@ -69,7 +69,7 @@ def test_small_graph(make_one_edge_graph: Callable[[], tuple]) -> None:
     assert 2 in graph_image, "Value 2 (edges) is missing from the graph image"
 
 
-def test_empty_graph() -> None:
+def test_draw_sn_graph_draws_valid_image_for_empty_graph() -> None:
     empty_graph = sn.draw_sn_graph([], [])
     assert isinstance(empty_graph, np.ndarray)
 
@@ -79,7 +79,7 @@ def test_empty_graph() -> None:
 
 
 @pytest.mark.parametrize("return_sdf", [True, False])  # type: ignore[misc]
-def test_3d_visualisation(
+def test_visualize_3d_graph_generates_valid_scene_for_valid_input(
     return_sdf: bool, make_cube: Callable[[int], np.ndarray]
 ) -> None:
     img = make_cube(3)
