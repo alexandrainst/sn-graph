@@ -1,4 +1,5 @@
-from typing import Tuple, Callable, Union
+from typing import Callable, Tuple, Union
+
 import numpy as np
 import pytest
 
