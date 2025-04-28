@@ -5,7 +5,7 @@
 <div align="center">
 
 [![build](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml)
-[![Code Coverage](https://img.shields.io/badge/Coverage-96%25-brightgreen.svg)](https://github.com/alexandrainst/sn-graph/tree/main/tests)
+[![Coverage Report](assets/coverage.svg)](https://github.com/alexandrainst/sn-graph/tree/main/tests)
 [![PyPI - Version](https://img.shields.io/pypi/v/sn-graph)](https://pypi.org/project/sn-graph/)
 [![License](https://img.shields.io/github/license/alexandrainst/sn-graph)](https://github.com/alexandrainst/sn-graph/blob/main/LICENSE)
 
