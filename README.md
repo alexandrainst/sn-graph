@@ -6,6 +6,8 @@
 
 [![build](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/alexandrainst/sn-graph/actions/workflows/build-and-test.yml)
 [![Coverage Report](assets/coverage.svg)](https://github.com/alexandrainst/sn-graph/tree/main/tests)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/alexandrainst/sn-graph/blob/main/.pre-commit-config.yaml)
+
 [![PyPI - Version](https://img.shields.io/pypi/v/sn-graph)](https://pypi.org/project/sn-graph/)
 [![License](https://img.shields.io/github/license/alexandrainst/sn-graph)](https://github.com/alexandrainst/sn-graph/blob/main/LICENSE)
 
