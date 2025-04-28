@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Tuple, Any, Callable
 
 import numpy as np
 import pytest
@@ -47,7 +47,6 @@ def test_draw_sn_graph_draws_valid_image_for_valid_input(
         np.isin(graph_image, list(set([0, 1, 2, 4]) - set(expected_values)))
     ), "Graph image contains values that should not be present"
 
-
     # Check shape if return_sdf or include_background
     if return_sdf or include_background:
         assert (
@@ -55,36 +54,42 @@ def test_draw_sn_graph_draws_valid_image_for_valid_input(
         ), f"Graph image shape {graph_image.shape} should match input image shape {img.shape}"
 
 
-def test_draw_sn_graph_draws_valid_image_for_small_graph(make_one_edge_graph: Callable[[], tuple]) -> None:
-    vertices, edges = make_one_edge_graph()
-    graph_image = sn.draw_sn_graph(vertices, edges)
+def test_array_mismatch_in_draw_sn_graph()-> None:
+    sdf_mock=np.zeros((10, 10))
+    background_mock=np.zeros((20, 20))
+    with pytest.raises(ValueError):
+        sn.draw_sn_graph([],[],sdf_mock,background_mock)
 
-    assert isinstance(graph_image, np.ndarray)
+def test_empty_graph_gives_empty_output() -> None:
+    empty_graph: tuple  = [], []
 
-    assert np.all(
-        np.isin(graph_image, [0, 2])
-    ), "Graph image should contain only values 0 (background) and 2 (edges)"
-
-    assert 0 in graph_image, "Value 0 (background) is missing from the graph image"
-    assert 2 in graph_image, "Value 2 (edges) is missing from the graph image"
-
-
-def test_draw_sn_graph_draws_valid_image_for_empty_graph() -> None:
-    empty_graph = sn.draw_sn_graph([], [])
-    assert isinstance(empty_graph, np.ndarray)
-
+    empty_image=sn.draw_sn_graph(*empty_graph)
+    assert isinstance(empty_image, np.ndarray)
     assert (
-        empty_graph.size == 0
+        empty_image.size == 0
     ), "Empty graph with no sdf or background image given, should return an empty array"
 
+    empty_scene = sn.visualize_3d_graph(*empty_graph)
+    assert isinstance(empty_scene, trimesh.Scene)
+    assert len(empty_scene.geometry) == 0, "Empty graph should return an empty scene"
 
-@pytest.mark.parametrize("return_sdf", [True, False])  # type: ignore[misc]
-def test_visualize_3d_graph_generates_valid_scene_for_valid_input(
-    return_sdf: bool, make_cube: Callable[[int], np.ndarray]
+
+@pytest.mark.parametrize(
+    "return_sdf, expected_geometry_count",
+    [
+        (False, 3), # if no sdf, then it will only draw 3 edges,
+        (True, 9) # if sdf is given, then it will draw 3 edges, 3 small vertex-spheres, and 3 big spheres]
+    ]
+)  # type: ignore[misc]
+def test_visualize_3d_graph_on_k3_graph(return_sdf: bool,
+    expected_geometry_count: int,
+    make_k3_graph_with_sdf: Callable[[], Tuple[Any, ...]]
 ) -> None:
-    img = make_cube(3)
-    sn_graph = sn.create_sn_graph(img, return_sdf=return_sdf, minimal_sphere_radius=1)
-    scene = sn.visualize_3d_graph(*sn_graph)
+
+    vertices, edges, sdf_array = make_k3_graph_with_sdf()
+    if not return_sdf:
+        sdf_array = None
+    scene = sn.visualize_3d_graph(vertices, edges, sdf_array)
 
     assert isinstance(scene, trimesh.Scene)
-    assert len(scene.geometry) > 0, "Scene should not be empty"
+    assert len(scene.geometry) == expected_geometry_count, f"Scene should have {expected_geometry_count} geometries when return_sdf is {return_sdf}"
