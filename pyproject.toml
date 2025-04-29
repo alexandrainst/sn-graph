@@ -34,7 +34,6 @@ torch-geometric = "^2.6.1"
 pooch = "^1.8.2"
 trimesh = "^4.6.4"
 rtree = "^1.4.0"
-sphinx-rtd-theme = "^3.0.2"
 
 
 
