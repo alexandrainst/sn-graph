@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sn-graph"
-version = "0.1.1"
+version = "0.2.0"
 description = "A Python implementation of SN-Graph algorithm."
 authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
 license = "MIT"
