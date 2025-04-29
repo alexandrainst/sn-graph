@@ -28,7 +28,8 @@ format:  ## Run autoformatters
 
 test:  ## Run all tests
 	@echo "Running tests..."
-	@poetry run pytest $(TESTS_DIR) -svv --cov-branch --cov-report=xml:$(TEST_REPORTS_DIR)/coverage.xml --cov-report=html:$(TEST_REPORTS_DIR)/htmlcov --junitxml=$(TEST_REPORTS_DIR)/results.xml
+	@poetry run pytest $(TESTS_DIR) -svv --cov-branch --cov-report=xml:$(TEST_REPORTS_DIR)/coverage.xml --cov-report=html:$(TEST_REPORTS_DIR)/htmlcov --cov-report=json:$(TEST_REPORTS_DIR)/coverage.json --junitxml=$(TEST_REPORTS_DIR)/results.xml
+	@poetry run coverage-badge -o assets/coverage.svg -f
 
 .DEFAULT_GOAL := help
 help: Makefile

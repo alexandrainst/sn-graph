@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "sn-graph"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python implementation of SN-Graph algorithm."
 authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/alexandrainst/sn-graph"
+homepage = "https://github.com/alexandrainst/sn-graph"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,6 +14,7 @@ numpy = "2.0"
 matplotlib = "^3.9.3"
 scikit-image = "^0.24.0"
 scikit-fmm = "^2024.9.16"
+trimesh = "^4.6.8"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -34,6 +37,7 @@ torch-geometric = "^2.6.1"
 pooch = "^1.8.2"
 trimesh = "^4.6.4"
 rtree = "^1.4.0"
+coverage-badge = "^1.1.2"
 
 
 
@@ -68,7 +72,7 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src.sn_graph --cov-report=term-missing"
+addopts = "--cov=src --cov-report=term-missing"
 testpaths = ["tests"]
 
 [tool.coverage.run]

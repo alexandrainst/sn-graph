@@ -1,23 +1,9 @@
+from typing import Callable
+
 import numpy as np
 import pytest
-from typing import Callable
+
 import sn_graph as sn
-
-
-@pytest.fixture  # type: ignore[misc]
-def make_cube() -> Callable[[int], np.ndarray]:
-    """Factory fixture that creates n-dimensional cubes on demand"""
-
-    def _make_nd_cube(n: int) -> np.ndarray:
-        shape = tuple([50] * n)
-        arr = np.zeros(shape)
-        start_idx = 10
-        end_idx = 40
-        slices = tuple(slice(start_idx, end_idx) for _ in range(n))
-        arr[slices] = 1
-        return arr
-
-    return _make_nd_cube
 
 
 @pytest.mark.parametrize("dim", [1, 2, 3, 4])  # type: ignore[misc]
