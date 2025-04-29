@@ -50,9 +50,8 @@ def create_sn_graph(
     -------
     Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], Tuple[int, ...]]]]
         A tuple containing:
-            - List of sphere centers as coordinate tuples
-            - List of edges as pairs of vertex coordinates
-            - if return_sdf is True: Signed distance field array
+        - List of sphere centers as coordinate tuples
+        - List of edges as pairs of vertex coordinates
     """
     (
         image,
