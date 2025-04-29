@@ -1,7 +1,8 @@
-import numpy as np
 from typing import Optional
-from skimage.draw import line_nd
+
+import numpy as np
 import trimesh
+from skimage.draw import line_nd
 
 
 def draw_sn_graph(

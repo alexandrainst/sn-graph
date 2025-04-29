@@ -1,9 +1,10 @@
+import time
+import warnings
+from typing import Any, Tuple, Union
+
 import numpy as np
 import skfmm
 from skimage.draw import line_nd
-from typing import Tuple, Union, Any
-import warnings
-import time
 
 
 def create_sn_graph(
@@ -121,57 +122,73 @@ def _validate_args(
     edge_sphere_threshold: float,
     return_sdf: bool,
 ) -> Tuple[np.ndarray, int, float, int, float, float, bool]:
-    assert isinstance(
-        image, np.ndarray
-    ), f"input must be a numpy array, got {type(image)}"
+    if not isinstance(image, np.ndarray):
+        raise TypeError(f"input must be a numpy array, got {type(image)}")
+
     image = np.squeeze(image)
     if image.ndim > 3:
         warnings.warn(
             f"Running algorithm on an input of high dimension. Input dimension: {image.ndim}",
             RuntimeWarning,
         )
-    assert isinstance(
-        max_num_vertices, int
-    ), f"max_num_vertices must be integer, got {type(max_num_vertices)}"
-    assert isinstance(
-        edge_threshold, (int, float)
-    ), f"edge_threshold must be numeric, got {type(edge_threshold)}"
-    assert isinstance(
-        max_edge_length, int
-    ), f"max_edge_length must be integer, got {type(max_edge_length)}"
-    assert isinstance(
-        minimal_sphere_radius, (int, float)
-    ), f"minimal_sphere_radius must be numeric, got {type(minimal_sphere_radius)}"
-    assert isinstance(
-        edge_sphere_threshold, (int, float)
-    ), f"edge_sphere_threshold must be numeric, got {type(edge_sphere_threshold)}"
-    assert isinstance(
-        return_sdf, bool
-    ), f"return_sdf must be boolean, got {type(return_sdf)}"
-    assert (
-        max_num_vertices == -1 or max_num_vertices >= 0
-    ), f"max_num_vertices must be -1 or non-negative, got {max_num_vertices}"
+
+    if not isinstance(max_num_vertices, int):
+        raise TypeError(
+            f"max_num_vertices must be integer, got {type(max_num_vertices)}"
+        )
+
+    if not isinstance(edge_threshold, (int, float)):
+        raise TypeError(f"edge_threshold must be numeric, got {type(edge_threshold)}")
+
+    if not isinstance(max_edge_length, int):
+        raise TypeError(f"max_edge_length must be integer, got {type(max_edge_length)}")
+
+    if not isinstance(minimal_sphere_radius, (int, float)):
+        raise TypeError(
+            f"minimal_sphere_radius must be numeric, got {type(minimal_sphere_radius)}"
+        )
+
+    if not isinstance(edge_sphere_threshold, (int, float)):
+        raise TypeError(
+            f"edge_sphere_threshold must be numeric, got {type(edge_sphere_threshold)}"
+        )
+
+    if not isinstance(return_sdf, bool):
+        raise TypeError(f"return_sdf must be boolean, got {type(return_sdf)}")
+
+    if not (max_num_vertices == -1 or max_num_vertices >= 0):
+        raise ValueError(
+            f"max_num_vertices must be -1 or non-negative, got {max_num_vertices}"
+        )
+
     if max_num_vertices == -1:
         max_num_vertices = np.inf
 
-    assert (
-        edge_threshold >= 0
-    ), f"edge_threshold must be non-negative, got {edge_threshold}"
-    assert (
-        max_edge_length == -1 or max_edge_length >= 0
-    ), f"max_edge_length must be -1 or non-negative, got {max_edge_length}"
+    if edge_threshold < 0:
+        raise ValueError(f"edge_threshold must be non-negative, got {edge_threshold}")
+
+    if not (max_edge_length == -1 or max_edge_length >= 0):
+        raise ValueError(
+            f"max_edge_length must be -1 or non-negative, got {max_edge_length}"
+        )
+
     if max_edge_length == -1:
         max_edge_length = np.inf
-    assert (
-        minimal_sphere_radius >= 0
-    ), f"minimal_sphere_radius must be non-negative, got {minimal_sphere_radius}"
-    assert (
-        edge_sphere_threshold >= 0
-    ), f"edge_sphere_threshold must be positive, got {edge_sphere_threshold}"
-    assert return_sdf in [
-        True,
-        False,
-    ], f"return_sdf must be a boolean, got {return_sdf}"
+
+    if minimal_sphere_radius < 0:
+        raise ValueError(
+            f"minimal_sphere_radius must be non-negative, got {minimal_sphere_radius}"
+        )
+
+    if edge_sphere_threshold < 0:
+        raise ValueError(
+            f"edge_sphere_threshold must be positive, got {edge_sphere_threshold}"
+        )
+
+    # This check is redundant after the isinstance(return_sdf, bool) check above
+    # but keeping a similar pattern to the original code
+    if return_sdf not in [True, False]:
+        raise ValueError(f"return_sdf must be a boolean, got {return_sdf}")
 
     return (
         image,
