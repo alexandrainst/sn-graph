@@ -15,16 +15,16 @@ def create_sn_graph(
     edge_sphere_threshold: float = 1.0,
     return_sdf: bool = False,
 ) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
-    """Create a graph from an nd-volume (e.g., 2D image or 3D volume) using the Sphere-Node (SN) graph skeletonisation algorithm.
+    """Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.
 
-    This function converts a grayscale/binary array into a graph representation by first computing
-    its signed distance field (assuming boundary contour has value 0/False), then placing sphere centers as vertices and creating edges between neighboring spheres based on specified criteria.
+    This function converts a grayscale image/volume into a graph representation by first computing
+    its signed distance field (assuming boundary contour has value 0), then placing sphere centers as vertices and creating edges between neighboring spheres based on specified criteria.
 
     Parameters
     ----------
     image : np.ndarray
-        Grayscale or binary input image/volume where foreground is positive (True) and background is 0 (False).
-        Can be a an n-dimensional numpy array.
+        Grayscale input image/volume where foreground is positive and background is 0.
+        Can be a 2D or 3D numpy array.
     max_num_vertices : int, optional
         Maximum number of vertices (sphere centers) to generate.
         If -1, no limit is applied.
@@ -38,13 +38,13 @@ def create_sn_graph(
         If -1, no limit is applied. Default is -1.
     minimal_sphere_radius : float, optional
         Minimum radius allowed for spheres when placing vertices.
-        Default is 5.0.
+        Default is 5
     edge_sphere_threshold: float, optional
-        Threshold value for deciding how close can an edge be to non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever.
-        Default is 1.0.
+        Threshold value for deciding how close can edge be to a non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever.
+        Default is 1.0
     return_sdf : bool, optional
         If True, the signed distance field array is returned as well.
-        Default is False.
+        Default is False
 
     Returns
     -------
