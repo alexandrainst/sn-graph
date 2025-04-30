@@ -12,17 +12,17 @@ def draw_sn_graph(
     background_image: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """
-    Draw a graph of spheres and edges on an image/volume (or on blank background). The function draws a monochromatic volume of the dimension equal to the dimension of the graph.
+    Draw a graph of spheres and edges on an image/volume (or on a blank background). The function creates a monochromatic volume of dimension equal to the dimension of the graph.
     Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.
 
     Args:
         spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
-        edges (list): of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
-        sdf_array (optional(np.ndarray) ): the signed distance function array, if not provided no spheres will be drawn.
+        edges (list): of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.
+        sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.
         background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.
 
     Returns:
-        (np.ndarray): the image/volume (or blank background) with the graph drawn on it.
+        (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.
     """
 
     # Check dimensions consistency
