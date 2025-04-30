@@ -3,6 +3,8 @@ site_name: SN-Graph
 theme:
   name: "material"
 
+repo_url: https://github.com/alexandrainst/sn-graph
+
 plugins:
 - mkdocstrings
 
