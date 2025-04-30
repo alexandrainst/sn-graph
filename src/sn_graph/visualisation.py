@@ -12,7 +12,8 @@ def draw_sn_graph(
     background_image: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """
-    Draw a graph of spheres and edges on an image/volume.
+    Draw a graph of spheres and edges on an image/volume (or on blank background). The function draws a monochromatic volume of the dimension equal to the dimension of the graph.
+    Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.
 
     Args:
         spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
@@ -117,9 +118,9 @@ def visualize_3d_graph(
     Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.
 
     Args:
-        spheres_centres (list) : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
-        edges (list) : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
-        sdf_array (optional(np.ndarray)) : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
+        spheres_centres (list): list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+        edges (list ): list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+        sdf_array (optional(np.ndarray) ): array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
 
     Returns:
         scene (trimesh.Scene): A 3D scene containing the graph visualization.
