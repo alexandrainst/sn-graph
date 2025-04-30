@@ -15,13 +15,13 @@ def draw_sn_graph(
     Draw a graph of spheres and edges on an image/volume.
 
     Args:
-        spheres_centres: list of tuples, each tuple contains coordinates of a sphere's centre.
-        edges: list of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
-        sdf_array: optional(np.ndarray), the signed distance function array, if not provided no spheres will be drawn
-        background_image: optional(np.ndarray), the image/volume on which to draw the graph
+        spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
+        edges (list): of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
+        sdf_array (optional(np.ndarray) ): the signed distance function array, if not provided no spheres will be drawn.
+        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.
 
     Returns:
-        np.ndarray: the image/volume (or blank background) with the graph drawn on it.
+        (np.ndarray): the image/volume (or blank background) with the graph drawn on it.
     """
 
     # Check dimensions consistency
@@ -117,14 +117,12 @@ def visualize_3d_graph(
     Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.
 
     Args:
-        spheres_centres : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
-        edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
-        sdf_array : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
+        spheres_centres (list) : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+        edges (list) : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+        sdf_array (optional(np.ndarray)) : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
 
     Returns:
-
-    scene : trimesh.Scene
-        A 3D scene containing the graph visualization.
+        scene (trimesh.Scene): A 3D scene containing the graph visualization.
     """
     # Create a scene
     scene = trimesh.Scene()

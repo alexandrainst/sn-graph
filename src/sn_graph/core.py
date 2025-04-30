@@ -19,40 +19,33 @@ def create_sn_graph(
     """Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.
 
     This function converts a grayscale image/volume into a graph representation by first computing
-    its signed distance field (assuming boundary contour has value 0), then placing sphere centers as vertices and creating edges between neighboring spheres based on specified criteria.
+    its signed distance field (assuming boundary contour has value 0), then placing sphere
+    centers as vertices and creating edges between neighboring spheres based on specified criteria.
 
-    Parameters
-    ----------
-    image : np.ndarray
-        Grayscale input image/volume where foreground is positive and background is 0.
-        Can be a 2D or 3D numpy array.
-    max_num_vertices : int, optional
-        Maximum number of vertices (sphere centers) to generate.
-        If -1, no limit is applied.
-        Default is -1.
-    edge_threshold : float, optional
-        Threshold value for determining what is the minimal portion of an edge that has to lie within the object.
-        Higher value is more restrictive, with 1 requiring edge to be fully contained in the object.
-        Default is 1.0.
-    max_edge_length : int, optional
-        Maximum allowed length for edges between vertices.
-        If -1, no limit is applied. Default is -1.
-    minimal_sphere_radius : float, optional
-        Minimum radius allowed for spheres when placing vertices.
-        Default is 5
-    edge_sphere_threshold: float, optional
-        Threshold value for deciding how close can edge be to a non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever.
-        Default is 1.0
-    return_sdf : bool, optional
-        If True, the signed distance field array is returned as well.
-        Default is False
+    Args:
+        image (np.ndarray): Grayscale input image/volume where foreground is positive and background is 0.
+            Can be a 2D or 3D numpy array.
+        max_num_vertices (int, optional): Maximum number of vertices (sphere centers) to generate.
+            If -1, no limit is applied. Defaults to -1.
+        edge_threshold (float, optional): Threshold value for determining what is the minimal portion of an edge
+            that has to lie within the object. Higher value is more restrictive, with 1 requiring
+            edge to be fully contained in the object. Defaults to 1.0.
+        max_edge_length (int, optional): Maximum allowed length for edges between vertices.
+            If -1, no limit is applied. Defaults to -1.
+        minimal_sphere_radius (float, optional): Minimum radius allowed for spheres when placing vertices.
+            Defaults to 5.
+        edge_sphere_threshold (float, optional): Threshold value for deciding how close can edge be to a
+            non-endpoint spheres. Higher value is more restrictive, with 1 allowing no
+            overlap whatsoever. Defaults to 1.0.
+        return_sdf (bool, optional): If True, the signed distance field array is returned as well.
+            Defaults to False.
 
-    Returns
-    -------
-    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], Tuple[int, ...]]]]
-        A tuple containing:
-        - List of sphere centers as coordinate tuples
-        - List of edges as pairs of vertex coordinates
+    Returns:
+        tuple: A tuple containing:
+            * List of sphere centers as coordinate tuples
+            * List of edges as pairs of vertex coordinates
+
+            If return_sdf is True, a third element with the signed distance field is included.
     """
     (
         image,
