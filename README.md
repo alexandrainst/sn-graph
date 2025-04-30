@@ -29,6 +29,12 @@ Given a binary image/volume representing a shape, SN-Graph works by:
 
 The resulting graph serves as a lightweight 1-dimensional representation of the original image, potentially useful for further analysis.
 
+## Documentation
+
+For documentation see [docs](https://alexandrainst.github.io/sn-graph/).
+
+For API reference see [api_reference](https://alexandrainst.github.io/sn-graph/reference).
+
 ## Installation
 
 ```bash
