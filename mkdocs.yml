@@ -7,7 +7,6 @@ plugins:
 - mkdocstrings
 
 nav:
-- index.md
-- quickstart.md
-- tutorials.md
+- Introduction: index.md
+- Installation and basic usage: installation.md
 - API Reference: reference.md
