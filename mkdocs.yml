@@ -1,0 +1,13 @@
+site_name: SN-Graph
+
+theme:
+  name: "material"
+
+plugins:
+- mkdocstrings
+
+nav:
+- index.md
+- quickstart.md
+- tutorials.md
+- API Reference: reference.md
