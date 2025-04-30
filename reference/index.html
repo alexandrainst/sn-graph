@@ -411,8 +411,7 @@
     <div class="doc doc-contents ">
 
         <p>Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.</p>
-<p>This function converts a grayscale image/volume into a graph representation by first computing
-its signed distance field (assuming boundary contour has value 0), then placing sphere
+<p>This function converts a grayscale (or binary) image/volume into a graph representation by first computing its signed distance field (assuming boundary contour has value 0), then placing sphere
 centers as vertices and creating edges between neighboring spheres based on specified criteria.</p>
 
 
@@ -436,8 +435,8 @@ centers as vertices and creating edges between neighboring spheres based on spec
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Grayscale input image/volume where foreground is positive and background is 0.
-Can be a 2D or 3D numpy array.</p>
+                <p>Input image/volume where the foreground is positive and the background is 0.
+Can be a numpy array of arbitrary dimension.</p>
               </div>
             </td>
             <td>
@@ -470,9 +469,7 @@ If -1, no limit is applied. Defaults to -1.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Threshold value for determining what is the minimal portion of an edge
-that has to lie within the object. Higher value is more restrictive, with 1 requiring
-edge to be fully contained in the object. Defaults to 1.0.</p>
+                <p>Threshold value for determining the minimal portion of an edge that must lie within the object. Higher value is more restrictive, with 1 requiring edge to be fully contained in the object. Defaults to 1.0.</p>
               </div>
             </td>
             <td>
@@ -522,9 +519,7 @@ Defaults to 5.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Threshold value for deciding how close can edge be to a
-non-endpoint spheres. Higher value is more restrictive, with 1 allowing no
-overlap whatsoever. Defaults to 1.0.</p>
+                <p>Threshold value for determining the minimum allowable distance between an edge and non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever. Defaults to 1.0.</p>
               </div>
             </td>
             <td>
@@ -567,10 +562,7 @@ Defaults to False.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A tuple containing:
-    List of sphere centers as coordinate tuples
-    List of edges as pairs of vertex coordinates</p>
-<p>If return_sdf is True, a third element with the signed distance field is included.</p>
+                <p>A tuple containing a list of sphere centers as coordinate tuples, a list of edges as pairs of vertex coordinates, and a signed distance field array if return_sdf is True.</p>
               </div>
             </td>
           </tr>
@@ -580,103 +572,94 @@ Defaults to False.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/sn_graph/core.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 10</span>
-<span class="normal"> 11</span>
-<span class="normal"> 12</span>
-<span class="normal"> 13</span>
-<span class="normal"> 14</span>
-<span class="normal"> 15</span>
-<span class="normal"> 16</span>
-<span class="normal"> 17</span>
-<span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_sn_graph</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_sn_graph</span><span class="p">(</span>
     <span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">max_num_vertices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">edge_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -687,34 +670,25 @@ Defaults to False.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.</span>
 
-<span class="sd">    This function converts a grayscale image/volume into a graph representation by first computing</span>
-<span class="sd">    its signed distance field (assuming boundary contour has value 0), then placing sphere</span>
+<span class="sd">    This function converts a grayscale (or binary) image/volume into a graph representation by first computing its signed distance field (assuming boundary contour has value 0), then placing sphere</span>
 <span class="sd">    centers as vertices and creating edges between neighboring spheres based on specified criteria.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        image (np.ndarray): Grayscale input image/volume where foreground is positive and background is 0.</span>
-<span class="sd">            Can be a 2D or 3D numpy array.</span>
+<span class="sd">        image (np.ndarray): Input image/volume where the foreground is positive and the background is 0.</span>
+<span class="sd">            Can be a numpy array of arbitrary dimension.</span>
 <span class="sd">        max_num_vertices (int, optional): Maximum number of vertices (sphere centers) to generate.</span>
 <span class="sd">            If -1, no limit is applied. Defaults to -1.</span>
-<span class="sd">        edge_threshold (float, optional): Threshold value for determining what is the minimal portion of an edge</span>
-<span class="sd">            that has to lie within the object. Higher value is more restrictive, with 1 requiring</span>
-<span class="sd">            edge to be fully contained in the object. Defaults to 1.0.</span>
+<span class="sd">        edge_threshold (float, optional): Threshold value for determining the minimal portion of an edge that must lie within the object. Higher value is more restrictive, with 1 requiring edge to be fully contained in the object. Defaults to 1.0.</span>
 <span class="sd">        max_edge_length (int, optional): Maximum allowed length for edges between vertices.</span>
 <span class="sd">            If -1, no limit is applied. Defaults to -1.</span>
 <span class="sd">        minimal_sphere_radius (float, optional): Minimum radius allowed for spheres when placing vertices.</span>
 <span class="sd">            Defaults to 5.</span>
-<span class="sd">        edge_sphere_threshold (float, optional): Threshold value for deciding how close can edge be to a</span>
-<span class="sd">            non-endpoint spheres. Higher value is more restrictive, with 1 allowing no</span>
-<span class="sd">            overlap whatsoever. Defaults to 1.0.</span>
+<span class="sd">        edge_sphere_threshold (float, optional): Threshold value for determining the minimum allowable distance between an edge and non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever. Defaults to 1.0.</span>
 <span class="sd">        return_sdf (bool, optional): If True, the signed distance field array is returned as well.</span>
 <span class="sd">            Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        tuple: A tuple containing:</span>
-<span class="sd">                List of sphere centers as coordinate tuples</span>
-<span class="sd">                List of edges as pairs of vertex coordinates</span>
-
-<span class="sd">            If return_sdf is True, a third element with the signed distance field is included.</span>
+<span class="sd">        tuple: A tuple containing a list of sphere centers as coordinate tuples, a list of edges as pairs of vertex coordinates, and a signed distance field array if return_sdf is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="p">(</span>
         <span class="n">image</span><span class="p">,</span>
@@ -790,7 +764,7 @@ Defaults to False.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Draw a graph of spheres and edges on an image/volume (or on blank background). The function draws a monochromatic volume of the dimension equal to the dimension of the graph.
+        <p>Draw a graph of spheres and edges on an image/volume (or on a blank background). The function creates a monochromatic volume of dimension equal to the dimension of the graph.
 Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.</p>
 
 
@@ -830,7 +804,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>of tuples of tuples, each tuple contains coordinates of the two ends of an edge.</p>
+                <p>of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</p>
               </div>
             </td>
             <td>
@@ -846,7 +820,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>the signed distance function array, if not provided no spheres will be drawn.</p>
+                <p>the signed distance field array, if not provided no spheres will be drawn.</p>
               </div>
             </td>
             <td>
@@ -888,7 +862,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>the image/volume (or blank background) with the graph drawn on it.</p>
+                <p>the image/volume (or a blank background) with the graph drawn on it.</p>
               </div>
             </td>
           </tr>
@@ -965,17 +939,17 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
     <span class="n">background_image</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Draw a graph of spheres and edges on an image/volume (or on blank background). The function draws a monochromatic volume of the dimension equal to the dimension of the graph.</span>
+<span class="sd">    Draw a graph of spheres and edges on an image/volume (or on a blank background). The function creates a monochromatic volume of dimension equal to the dimension of the graph.</span>
 <span class="sd">    Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere&#39;s centre.</span>
-<span class="sd">        edges (list): of tuples of tuples, each tuple contains coordinates of the two ends of an edge.</span>
-<span class="sd">        sdf_array (optional(np.ndarray) ): the signed distance function array, if not provided no spheres will be drawn.</span>
+<span class="sd">        edges (list): of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</span>
+<span class="sd">        sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.</span>
 <span class="sd">        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (np.ndarray): the image/volume (or blank background) with the graph drawn on it.</span>
+<span class="sd">        (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Check dimensions consistency</span>
