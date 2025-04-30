@@ -36,8 +36,7 @@ def create_sn_graph(
             Defaults to False.
 
     Returns:
-       tuple: A tuple containing a list of sphere centers as coordinate tuples, a
-        list of edges as pairs of vertex coordinates, and a signed distance field array if return_sdf is True.
+        tuple: A tuple containing a list of sphere centers as coordinate tuples, a list of edges as pairs of vertex coordinates, and a signed distance field array if return_sdf is True.
     """
     (
         image,
