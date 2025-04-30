@@ -1,8 +1,5 @@
 # Introduction
 
-
-
-
 ## What is SN-Graph?
 
 `sn-graph` is a Python library containing an implementation of the SN-Graph algorithm.
@@ -10,7 +7,6 @@
 The SN-Graph is a `graph skeletonisation algorithm`, that is, an algorithm that takes a 2D/3D shape (e.g. a volume) and computes a graph skeleton of that shape. The skeleton is a lightweight, 1-dimensional representation that preserves the rough geometric structure of the shape. As such, it can be used for further processing, and various ML tasks, such as classification, regression, etc.
 
 The goal of `sn-graph` is to provide the first Python implementation of the algorithm, together with functions to easily visualise the effect either as a volume (numpy array) or as an interactive 3d scene via trimesh.
-
 
 ## About the algorithm
 
