@@ -1,5 +1,9 @@
 # Introduction
 
+
+![Animation of adding spheres to the graph](https://raw.githubusercontent.com/alexandrainst/sn-graph/7-make-nice-docs/assets/horse_animation.gif)
+
+
 ## What is SN-Graph?
 
 `sn-graph` is a Python library containing an implementation of the SN-Graph algorithm.
