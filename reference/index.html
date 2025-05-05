@@ -804,7 +804,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</p>
+                <p>list of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</p>
               </div>
             </td>
             <td>
@@ -836,7 +836,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>the image/volume on which to draw the graph.</p>
+                <p>the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.</p>
               </div>
             </td>
             <td>
@@ -863,6 +863,29 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
             <td>
               <div class="doc-md-description">
                 <p>the image/volume (or a blank background) with the graph drawn on it.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if the shape of <code>sdf_array</code> is not equal to the shape of <code>background_image</code>.</p>
               </div>
             </td>
           </tr>
@@ -932,7 +955,10 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">draw_sn_graph</span><span class="p">(</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">draw_sn_graph</span><span class="p">(</span>
     <span class="n">spheres_centres</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">sdf_array</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -944,12 +970,15 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 
 <span class="sd">    Args:</span>
 <span class="sd">        spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere&#39;s centre.</span>
-<span class="sd">        edges (list): of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</span>
+<span class="sd">        edges (list): list of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.</span>
 <span class="sd">        sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.</span>
-<span class="sd">        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.</span>
+<span class="sd">        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if the shape of `sdf_array` is not equal to the shape of `background_image`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Check dimensions consistency</span>
@@ -1010,7 +1039,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 
     <div class="doc doc-contents ">
 
-        <p>Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.</p>
+        <p>Visualize a 3D graph with vertices, edges, and spheres by creating a trimesh scene object.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1101,10 +1130,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 
             <details class="quote">
               <summary>Source code in <code>src/sn_graph/visualisation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
@@ -1146,11 +1172,15 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">visualize_3d_graph</span><span class="p">(</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">visualize_3d_graph</span><span class="p">(</span>
     <span class="n">spheres_centres</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">sdf_array</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.</span>
+<span class="sd">    Visualize a 3D graph with vertices, edges, and spheres by creating a trimesh scene object.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        spheres_centres (list): list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]</span>
@@ -1160,6 +1190,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 <span class="sd">    Returns:</span>
 <span class="sd">        scene (trimesh.Scene): A 3D scene containing the graph visualization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Create a scene</span>
     <span class="n">scene</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">Scene</span><span class="p">()</span>
 
