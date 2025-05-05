@@ -17,7 +17,7 @@ def draw_sn_graph(
 
     Args:
         spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
-        edges (list): of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.
+        edges (list): list of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.
         sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.
         background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.
 
