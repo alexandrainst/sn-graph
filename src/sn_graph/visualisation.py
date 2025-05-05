@@ -25,7 +25,7 @@ def draw_sn_graph(
         (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.
 
     Raises:
-        ValueError: If the shape of `sdf_array` is not equal to the shape of `background_image`.
+        ValueError: if the shape of `sdf_array` is not equal to the shape of `background_image`.
     """
 
     # Check dimensions consistency
