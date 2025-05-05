@@ -19,10 +19,13 @@ def draw_sn_graph(
         spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
         edges (list): list of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.
         sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.
-        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph.
+        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.
 
     Returns:
         (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.
+
+    Raises:
+        ValueError: If the shape of `sdf_array` is not equal to the shape of `background_image`.
     """
 
     # Check dimensions consistency
