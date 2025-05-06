@@ -7,7 +7,7 @@
 
 `sn-graph` is a Python library containing an implementation of the SN-Graph algorithm.
 
-The SN-Graph is a `graph skeletonisation algorithm`, that is, an algorithm that takes a 2D/3D shape (e.g. a volume) and computes a graph skeleton of that shape. The skeleton is a lightweight, 1-dimensional representation that preserves the rough geometric structure of the shape. As such, it can be used for further processing, and various ML tasks, such as classification, regression, etc.
+The SN-Graph is a `graph skeletonisation algorithm`, that is, an algorithm that takes a 2D/3D shape (e.g., a volume) and computes a graph skeleton of that shape. The skeleton is a lightweight, 1-dimensional representation that preserves the rough geometric structure of the shape. As such, it can be used for further processing, and various ML tasks, such as classification, regression, etc.
 
 The goal of `sn-graph` is to provide the first Python implementation of the algorithm, together with functions to easily visualise the effect either as a volume (numpy array) or as an interactive 3D scene via trimesh.
 
@@ -18,4 +18,4 @@ The algorithm takes as an input a binary (or a monochromatic) image/volume, wher
 
   - compute the Signed Distance Field (SDF) of the contour
   - add vertices, seen as centres of spheres inscribed in the image (one uses SDF to query cooridnates for the spheres radii). The order of adding spheres is a minimax-style queue, where one balances maximising the distances between the points (like in Furthest Point Sampling), and the size of the added spheres. **The strength of this approach lies in the fact that even with few vertices, it describes the shape well.**
-  - add edges between the spheres. Edges are added between the chosen vertices based on a couple of criteria, like e.g. an edge has to be mostly contained within the shape, or an edge should not cross any spheres other than its endpoints.
+  - add edges between the spheres. Edges are added between the chosen vertices based on a couple of criteria, like e.g., an edge has to be mostly contained within the shape, or an edge should not cross any spheres other than its endpoints.
