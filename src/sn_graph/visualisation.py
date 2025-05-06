@@ -129,6 +129,17 @@ def visualize_3d_graph(
         scene (trimesh.Scene): A 3D scene containing the graph visualization.
     """
 
+    if spheres_centres and (len(spheres_centres[0]) != 3):
+        raise ValueError("Expected 3D coordinates (x,y,z) for vertices.")
+
+    if edges and (len(edges[0][0]) != 3 or len(edges[0][1]) != 3):
+        raise ValueError("Expected 3D coordinates (x,y,z) for edge endpoints.")
+
+    if sdf_array is not None and sdf_array.ndim != 3:
+        raise ValueError(
+            f"SDF array must be 3-dimensional. Found {sdf_array.ndim} dimensions."
+        )
+
     # Create a scene
     scene = trimesh.Scene()
 
