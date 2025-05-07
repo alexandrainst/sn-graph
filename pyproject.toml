@@ -41,6 +41,7 @@ coverage-badge = "^1.1.2"
 mkdocs = "^1.6.1"
 mkdocstrings = {extras = ["python"], version = "^0.29.1"}
 mkdocs-material = "^9.6.12"
+mknotebooks = "^0.8.0"
 
 
 
