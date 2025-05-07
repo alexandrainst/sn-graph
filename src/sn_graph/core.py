@@ -1,4 +1,3 @@
-import time
 import warnings
 from typing import Any, Tuple, Union
 
@@ -56,9 +55,6 @@ def create_sn_graph(
         return_sdf,
     )
 
-    print("Computing SDF array...")
-    start = time.time()
-
     # Pad the image with 1's to avoid edge effects in the signed distance field computation
     padded_image = np.pad(image, 1)
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
@@ -66,21 +62,9 @@ def create_sn_graph(
     slice_tuple = tuple(slice(1, -1) for _ in range(image.ndim))
     sdf_array = padded_sdf_array[slice_tuple]
 
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
-
-    print("Computing sphere centres...")
-    start = time.time()
-
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
-
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
-
-    print("Computing edges...")
-    start = time.time()
 
     edges = determine_edges(
         spheres_centres,
@@ -89,8 +73,6 @@ def create_sn_graph(
         edge_threshold,
         edge_sphere_threshold,
     )
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
 
     if return_sdf:
         return spheres_centres, edges, sdf_array
