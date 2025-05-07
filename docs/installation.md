@@ -38,9 +38,3 @@ plt.imshow(graph_image)
 plt.show()
 ```
 <img src="https://raw.githubusercontent.com/alexandrainst/sn-graph/main/assets/square_readme.png" alt="SN-Graph drawn on top of the square" width="500">
-
-
-## Tutorials
-* [demo_sn-graph](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/demo_sn-graph.ipynb) A notebook with a 2D demo
-* [3d_demo](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/3D_demo.ipynb) A ntoebook with 3d demo
-* [mnist_classification](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/mnist_classification.ipynb) Mnist classification with SN-gaph nad Graph Neural Networks
