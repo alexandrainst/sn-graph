@@ -581,6 +581,7 @@
 
 
 <pre><code class="language-python">import sys
+
 sys.path.append(&quot;../src&quot;)
 
 from sklearn.datasets import fetch_openml
@@ -595,9 +596,7 @@ import matplotlib.pyplot as plt
 <div class="input">
 
 
-<pre><code class="language-python">
-
-# Load MNIST
+<pre><code class="language-python"># Load MNIST
 X, y = fetch_openml(&quot;mnist_784&quot;, version=1, return_X_y=True, as_frame=False)
 
 # Reshape to (n_samples, 28, 28)
@@ -635,7 +634,7 @@ X = X / 255.0
 <div class="input">
 
 
-<pre><code class="language-python">NUM_IMAGES=20
+<pre><code class="language-python">NUM_IMAGES = 20
 graphs = []
 images = []
 
@@ -660,12 +659,13 @@ for img in X[:NUM_IMAGES]:
 
 
 <pre><code class="language-python">for i in range(len(graphs)):
-
     vertices, edges, sdf_array = graphs[i]
     img = sn.draw_sn_graph(vertices, edges, sdf_array, background_image=images[i])
 
     plt.imshow(img, cmap=&quot;gray&quot;)
-    plt.title(f&quot;&quot;&quot;Label: {y[i]}\n  Number of vertices: {len(vertices)} \n Number of edges: {len(edges)}&quot;&quot;&quot;)
+    plt.title(
+        f&quot;&quot;&quot;Label: {y[i]}\n  Number of vertices: {len(vertices)} \n Number of edges: {len(edges)}&quot;&quot;&quot;
+    )
     plt.axis(&quot;off&quot;)
     plt.show()
 </code></pre>
@@ -911,9 +911,9 @@ print(f&quot;Length of the dataset: {len(dataset)}&quot;)
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Precomputing graphs:  12%|█▏        | 8078/70000 [00:12&lt;01:34, 657.20it/s]/Users/tomasz/code/sn-graph/src/sn_graph/core.py:266: RuntimeWarning: Image is empty or there are no spheres larger than the minimal_sphere_radius: 1. No vertices will be placed.
+<code>Precomputing graphs:  12%|█▏        | 8059/70000 [00:14&lt;01:32, 673.22it/s]/Users/tomasz/code/sn-graph/src/sn_graph/core.py:266: RuntimeWarning: Image is empty or there are no spheres larger than the minimal_sphere_radius: 1. No vertices will be placed.
   warnings.warn(
-Precomputing graphs: 100%|██████████| 70000/70000 [01:39&lt;00:00, 700.17it/s]</code>
+Precomputing graphs: 100%|██████████| 70000/70000 [01:45&lt;00:00, 661.85it/s]</code>
 </pre>
 </div>
 </div>
@@ -987,9 +987,6 @@ class GraphClassificationNetwork(torch.nn.Module):
         x = F.dropout(x, p=0.1, training=self.training)
         x = self.lin2(x)
         return x
-
-
-
 </code></pre>
 
 
@@ -1019,8 +1016,8 @@ print(f&quot;Model parameters: {sum(p.numel() for p in model.parameters())}&quot
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 <code>torch.Size([1, 10])
-tensor([[-0.1698, -0.1714,  0.0989, -0.0630,  0.1307,  0.0862, -0.0397,  0.0135,
-          0.1525, -0.2285]], grad_fn=&lt;AddmmBackward0&gt;)
+tensor([[-0.0247,  0.1276, -0.1412, -0.0920, -0.0124,  0.1965,  0.0108,  0.0055,
+         -0.1311,  0.1071]], grad_fn=&lt;AddmmBackward0&gt;)
 Model parameters: 14954
 </code>
 </pre>
@@ -1169,8 +1166,8 @@ print(f&quot;Best test accuracy: {best_acc:.4f}&quot;)
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 1: 100%|██████████| 1860/1860 [00:11&lt;00:00, 155.85it/s]
-Epoch 1: 100%|██████████| 329/329 [00:00&lt;00:00, 357.61it/s]
+<code>Epoch 1: 100%|██████████| 1860/1860 [00:11&lt;00:00, 168.41it/s]
+Epoch 1: 100%|██████████| 329/329 [00:00&lt;00:00, 364.38it/s]
 </code>
 </pre>
 </div>
@@ -1178,7 +1175,7 @@ Epoch 1: 100%|██████████| 329/329 [00:00&lt;00:00, 357.61it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 001, Train loss: 51.7612, Test loss: 39.2435, Train Acc: 0.4253, Test Acc: 0.5896
+<code>Epoch 001, Train loss: 49.8232, Test loss: 37.7702, Train Acc: 0.4528, Test Acc: 0.5981
 </code>
 </pre>
 </div>
@@ -1186,8 +1183,8 @@ Epoch 1: 100%|██████████| 329/329 [00:00&lt;00:00, 357.61it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 2: 100%|██████████| 1860/1860 [00:11&lt;00:00, 156.96it/s]
-Epoch 2: 100%|██████████| 329/329 [00:00&lt;00:00, 357.65it/s]
+<code>Epoch 2: 100%|██████████| 1860/1860 [00:11&lt;00:00, 164.21it/s]
+Epoch 2: 100%|██████████| 329/329 [00:00&lt;00:00, 347.76it/s]
 </code>
 </pre>
 </div>
@@ -1195,7 +1192,7 @@ Epoch 2: 100%|██████████| 329/329 [00:00&lt;00:00, 357.65it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 002, Train loss: 37.4139, Test loss: 32.0102, Train Acc: 0.5991, Test Acc: 0.6652
+<code>Epoch 002, Train loss: 34.7280, Test loss: 28.2593, Train Acc: 0.6324, Test Acc: 0.7137
 </code>
 </pre>
 </div>
@@ -1203,8 +1200,8 @@ Epoch 2: 100%|██████████| 329/329 [00:00&lt;00:00, 357.65it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 3: 100%|██████████| 1860/1860 [00:12&lt;00:00, 148.81it/s]
-Epoch 3: 100%|██████████| 329/329 [00:00&lt;00:00, 358.38it/s]
+<code>Epoch 3: 100%|██████████| 1860/1860 [00:12&lt;00:00, 147.38it/s]
+Epoch 3: 100%|██████████| 329/329 [00:00&lt;00:00, 351.00it/s]
 </code>
 </pre>
 </div>
@@ -1212,7 +1209,7 @@ Epoch 3: 100%|██████████| 329/329 [00:00&lt;00:00, 358.38it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 003, Train loss: 30.7914, Test loss: 24.9007, Train Acc: 0.6758, Test Acc: 0.7460
+<code>Epoch 003, Train loss: 26.8925, Test loss: 22.3350, Train Acc: 0.7191, Test Acc: 0.7668
 </code>
 </pre>
 </div>
@@ -1220,8 +1217,8 @@ Epoch 3: 100%|██████████| 329/329 [00:00&lt;00:00, 358.38it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 4: 100%|██████████| 1860/1860 [00:11&lt;00:00, 158.74it/s]
-Epoch 4: 100%|██████████| 329/329 [00:00&lt;00:00, 358.42it/s]
+<code>Epoch 4: 100%|██████████| 1860/1860 [00:12&lt;00:00, 147.55it/s]
+Epoch 4: 100%|██████████| 329/329 [00:00&lt;00:00, 330.46it/s]
 </code>
 </pre>
 </div>
@@ -1229,7 +1226,7 @@ Epoch 4: 100%|██████████| 329/329 [00:00&lt;00:00, 358.42it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 004, Train loss: 23.9757, Test loss: 19.4520, Train Acc: 0.7509, Test Acc: 0.7995
+<code>Epoch 004, Train loss: 22.8523, Test loss: 19.3730, Train Acc: 0.7624, Test Acc: 0.8054
 </code>
 </pre>
 </div>
@@ -1237,8 +1234,8 @@ Epoch 4: 100%|██████████| 329/329 [00:00&lt;00:00, 358.42it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 5: 100%|██████████| 1860/1860 [00:11&lt;00:00, 156.79it/s]
-Epoch 5: 100%|██████████| 329/329 [00:00&lt;00:00, 353.48it/s]
+<code>Epoch 5: 100%|██████████| 1860/1860 [00:12&lt;00:00, 144.36it/s]
+Epoch 5: 100%|██████████| 329/329 [00:00&lt;00:00, 338.93it/s]
 </code>
 </pre>
 </div>
@@ -1246,7 +1243,7 @@ Epoch 5: 100%|██████████| 329/329 [00:00&lt;00:00, 353.48it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 005, Train loss: 20.2760, Test loss: 17.0496, Train Acc: 0.7920, Test Acc: 0.8275
+<code>Epoch 005, Train loss: 20.3510, Test loss: 17.0641, Train Acc: 0.7913, Test Acc: 0.8255
 </code>
 </pre>
 </div>
@@ -1254,8 +1251,8 @@ Epoch 5: 100%|██████████| 329/329 [00:00&lt;00:00, 353.48it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 6: 100%|██████████| 1860/1860 [00:11&lt;00:00, 157.81it/s]
-Epoch 6: 100%|██████████| 329/329 [00:00&lt;00:00, 359.48it/s]
+<code>Epoch 6: 100%|██████████| 1860/1860 [00:11&lt;00:00, 160.53it/s]
+Epoch 6: 100%|██████████| 329/329 [00:00&lt;00:00, 352.53it/s]
 </code>
 </pre>
 </div>
@@ -1263,7 +1260,7 @@ Epoch 6: 100%|██████████| 329/329 [00:00&lt;00:00, 359.48it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 006, Train loss: 18.3760, Test loss: 16.1018, Train Acc: 0.8126, Test Acc: 0.8360
+<code>Epoch 006, Train loss: 18.6435, Test loss: 16.4745, Train Acc: 0.8088, Test Acc: 0.8283
 </code>
 </pre>
 </div>
@@ -1271,8 +1268,8 @@ Epoch 6: 100%|██████████| 329/329 [00:00&lt;00:00, 359.48it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 7: 100%|██████████| 1860/1860 [00:11&lt;00:00, 156.53it/s]
-Epoch 7: 100%|██████████| 329/329 [00:00&lt;00:00, 364.05it/s]
+<code>Epoch 7: 100%|██████████| 1860/1860 [00:11&lt;00:00, 166.42it/s]
+Epoch 7: 100%|██████████| 329/329 [00:00&lt;00:00, 371.32it/s]
 </code>
 </pre>
 </div>
@@ -1280,7 +1277,7 @@ Epoch 7: 100%|██████████| 329/329 [00:00&lt;00:00, 364.05it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 007, Train loss: 17.1533, Test loss: 15.3670, Train Acc: 0.8256, Test Acc: 0.8426
+<code>Epoch 007, Train loss: 17.7490, Test loss: 15.4272, Train Acc: 0.8193, Test Acc: 0.8418
 </code>
 </pre>
 </div>
@@ -1288,8 +1285,8 @@ Epoch 7: 100%|██████████| 329/329 [00:00&lt;00:00, 364.05it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 8: 100%|██████████| 1860/1860 [00:12&lt;00:00, 152.83it/s]
-Epoch 8: 100%|██████████| 329/329 [00:00&lt;00:00, 363.46it/s]
+<code>Epoch 8: 100%|██████████| 1860/1860 [00:11&lt;00:00, 164.37it/s]
+Epoch 8: 100%|██████████| 329/329 [00:00&lt;00:00, 369.50it/s]
 </code>
 </pre>
 </div>
@@ -1297,7 +1294,7 @@ Epoch 8: 100%|██████████| 329/329 [00:00&lt;00:00, 363.46it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 008, Train loss: 16.3563, Test loss: 14.0174, Train Acc: 0.8330, Test Acc: 0.8575
+<code>Epoch 008, Train loss: 17.0071, Test loss: 14.4742, Train Acc: 0.8261, Test Acc: 0.8541
 </code>
 </pre>
 </div>
@@ -1305,8 +1302,8 @@ Epoch 8: 100%|██████████| 329/329 [00:00&lt;00:00, 363.46it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 9: 100%|██████████| 1860/1860 [00:12&lt;00:00, 148.10it/s]
-Epoch 9: 100%|██████████| 329/329 [00:00&lt;00:00, 348.65it/s]
+<code>Epoch 9: 100%|██████████| 1860/1860 [00:10&lt;00:00, 170.73it/s]
+Epoch 9: 100%|██████████| 329/329 [00:00&lt;00:00, 364.14it/s]
 </code>
 </pre>
 </div>
@@ -1314,7 +1311,7 @@ Epoch 9: 100%|██████████| 329/329 [00:00&lt;00:00, 348.65it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 009, Train loss: 15.6047, Test loss: 13.7078, Train Acc: 0.8409, Test Acc: 0.8610
+<code>Epoch 009, Train loss: 16.4419, Test loss: 14.1115, Train Acc: 0.8330, Test Acc: 0.8568
 </code>
 </pre>
 </div>
@@ -1322,8 +1319,8 @@ Epoch 9: 100%|██████████| 329/329 [00:00&lt;00:00, 348.65it/
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 10: 100%|██████████| 1860/1860 [00:12&lt;00:00, 145.51it/s]
-Epoch 10: 100%|██████████| 329/329 [00:00&lt;00:00, 342.90it/s]
+<code>Epoch 10: 100%|██████████| 1860/1860 [00:10&lt;00:00, 170.40it/s]
+Epoch 10: 100%|██████████| 329/329 [00:00&lt;00:00, 373.42it/s]
 </code>
 </pre>
 </div>
@@ -1331,7 +1328,7 @@ Epoch 10: 100%|██████████| 329/329 [00:00&lt;00:00, 342.90it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 010, Train loss: 14.8745, Test loss: 13.3255, Train Acc: 0.8504, Test Acc: 0.8677
+<code>Epoch 010, Train loss: 15.9388, Test loss: 13.2850, Train Acc: 0.8375, Test Acc: 0.8678
 </code>
 </pre>
 </div>
@@ -1339,8 +1336,8 @@ Epoch 10: 100%|██████████| 329/329 [00:00&lt;00:00, 342.90it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 11: 100%|██████████| 1860/1860 [00:12&lt;00:00, 154.68it/s]
-Epoch 11: 100%|██████████| 329/329 [00:01&lt;00:00, 323.22it/s]
+<code>Epoch 11: 100%|██████████| 1860/1860 [00:10&lt;00:00, 176.18it/s]
+Epoch 11: 100%|██████████| 329/329 [00:00&lt;00:00, 372.29it/s]
 </code>
 </pre>
 </div>
@@ -1348,7 +1345,7 @@ Epoch 11: 100%|██████████| 329/329 [00:01&lt;00:00, 323.22it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 011, Train loss: 14.2242, Test loss: 11.9772, Train Acc: 0.8565, Test Acc: 0.8803
+<code>Epoch 011, Train loss: 15.4006, Test loss: 13.8116, Train Acc: 0.8440, Test Acc: 0.8603
 </code>
 </pre>
 </div>
@@ -1356,8 +1353,8 @@ Epoch 11: 100%|██████████| 329/329 [00:01&lt;00:00, 323.22it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 12: 100%|██████████| 1860/1860 [00:11&lt;00:00, 162.50it/s]
-Epoch 12: 100%|██████████| 329/329 [00:00&lt;00:00, 371.46it/s]
+<code>Epoch 12: 100%|██████████| 1860/1860 [00:10&lt;00:00, 174.15it/s]
+Epoch 12: 100%|██████████| 329/329 [00:00&lt;00:00, 367.74it/s]
 </code>
 </pre>
 </div>
@@ -1365,7 +1362,7 @@ Epoch 12: 100%|██████████| 329/329 [00:00&lt;00:00, 371.46it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 012, Train loss: 13.7132, Test loss: 12.3045, Train Acc: 0.8626, Test Acc: 0.8755
+<code>Epoch 012, Train loss: 15.0266, Test loss: 13.3172, Train Acc: 0.8475, Test Acc: 0.8663
 </code>
 </pre>
 </div>
@@ -1373,8 +1370,8 @@ Epoch 12: 100%|██████████| 329/329 [00:00&lt;00:00, 371.46it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 13: 100%|██████████| 1860/1860 [00:11&lt;00:00, 160.34it/s]
-Epoch 13: 100%|██████████| 329/329 [00:00&lt;00:00, 362.76it/s]
+<code>Epoch 13: 100%|██████████| 1860/1860 [00:10&lt;00:00, 173.02it/s]
+Epoch 13: 100%|██████████| 329/329 [00:00&lt;00:00, 353.98it/s]
 </code>
 </pre>
 </div>
@@ -1382,7 +1379,7 @@ Epoch 13: 100%|██████████| 329/329 [00:00&lt;00:00, 362.76it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 013, Train loss: 13.3915, Test loss: 11.9345, Train Acc: 0.8644, Test Acc: 0.8800
+<code>Epoch 013, Train loss: 14.5775, Test loss: 12.6743, Train Acc: 0.8542, Test Acc: 0.8750
 </code>
 </pre>
 </div>
@@ -1390,8 +1387,8 @@ Epoch 13: 100%|██████████| 329/329 [00:00&lt;00:00, 362.76it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 14: 100%|██████████| 1860/1860 [00:11&lt;00:00, 161.23it/s]
-Epoch 14: 100%|██████████| 329/329 [00:00&lt;00:00, 357.85it/s]
+<code>Epoch 14: 100%|██████████| 1860/1860 [00:10&lt;00:00, 174.80it/s]
+Epoch 14: 100%|██████████| 329/329 [00:00&lt;00:00, 365.32it/s]
 </code>
 </pre>
 </div>
@@ -1399,7 +1396,7 @@ Epoch 14: 100%|██████████| 329/329 [00:00&lt;00:00, 357.85it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 014, Train loss: 12.9854, Test loss: 11.6174, Train Acc: 0.8683, Test Acc: 0.8840
+<code>Epoch 014, Train loss: 14.1347, Test loss: 12.1599, Train Acc: 0.8568, Test Acc: 0.8750
 </code>
 </pre>
 </div>
@@ -1407,8 +1404,8 @@ Epoch 14: 100%|██████████| 329/329 [00:00&lt;00:00, 357.85it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 15: 100%|██████████| 1860/1860 [00:12&lt;00:00, 148.96it/s]
-Epoch 15: 100%|██████████| 329/329 [00:00&lt;00:00, 359.75it/s]
+<code>Epoch 15: 100%|██████████| 1860/1860 [00:10&lt;00:00, 172.85it/s]
+Epoch 15: 100%|██████████| 329/329 [00:00&lt;00:00, 371.41it/s]
 </code>
 </pre>
 </div>
@@ -1416,7 +1413,7 @@ Epoch 15: 100%|██████████| 329/329 [00:00&lt;00:00, 359.75it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 015, Train loss: 12.6831, Test loss: 11.4210, Train Acc: 0.8729, Test Acc: 0.8836
+<code>Epoch 015, Train loss: 13.8946, Test loss: 11.7845, Train Acc: 0.8598, Test Acc: 0.8826
 </code>
 </pre>
 </div>
@@ -1424,8 +1421,8 @@ Epoch 15: 100%|██████████| 329/329 [00:00&lt;00:00, 359.75it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 16: 100%|██████████| 1860/1860 [00:11&lt;00:00, 160.88it/s]
-Epoch 16: 100%|██████████| 329/329 [00:00&lt;00:00, 372.23it/s]
+<code>Epoch 16: 100%|██████████| 1860/1860 [00:11&lt;00:00, 167.20it/s]
+Epoch 16: 100%|██████████| 329/329 [00:01&lt;00:00, 327.85it/s]
 </code>
 </pre>
 </div>
@@ -1433,7 +1430,7 @@ Epoch 16: 100%|██████████| 329/329 [00:00&lt;00:00, 372.23it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 016, Train loss: 12.2867, Test loss: 11.8953, Train Acc: 0.8749, Test Acc: 0.8806
+<code>Epoch 016, Train loss: 13.5492, Test loss: 12.0653, Train Acc: 0.8637, Test Acc: 0.8784
 </code>
 </pre>
 </div>
@@ -1441,8 +1438,8 @@ Epoch 16: 100%|██████████| 329/329 [00:00&lt;00:00, 372.23it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 17: 100%|██████████| 1860/1860 [00:12&lt;00:00, 148.32it/s]
-Epoch 17: 100%|██████████| 329/329 [00:00&lt;00:00, 367.76it/s]
+<code>Epoch 17: 100%|██████████| 1860/1860 [00:12&lt;00:00, 152.63it/s]
+Epoch 17: 100%|██████████| 329/329 [00:00&lt;00:00, 338.41it/s]
 </code>
 </pre>
 </div>
@@ -1450,7 +1447,7 @@ Epoch 17: 100%|██████████| 329/329 [00:00&lt;00:00, 367.76it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 017, Train loss: 12.1422, Test loss: 10.9963, Train Acc: 0.8773, Test Acc: 0.8894
+<code>Epoch 017, Train loss: 13.2297, Test loss: 11.3634, Train Acc: 0.8670, Test Acc: 0.8881
 </code>
 </pre>
 </div>
@@ -1458,8 +1455,8 @@ Epoch 17: 100%|██████████| 329/329 [00:00&lt;00:00, 367.76it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 18: 100%|██████████| 1860/1860 [00:12&lt;00:00, 150.96it/s]
-Epoch 18: 100%|██████████| 329/329 [00:00&lt;00:00, 329.77it/s]
+<code>Epoch 18: 100%|██████████| 1860/1860 [00:11&lt;00:00, 165.82it/s]
+Epoch 18: 100%|██████████| 329/329 [00:00&lt;00:00, 340.82it/s]
 </code>
 </pre>
 </div>
@@ -1467,7 +1464,7 @@ Epoch 18: 100%|██████████| 329/329 [00:00&lt;00:00, 329.77it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 018, Train loss: 11.9436, Test loss: 10.4596, Train Acc: 0.8771, Test Acc: 0.8953
+<code>Epoch 018, Train loss: 12.9660, Test loss: 11.0135, Train Acc: 0.8702, Test Acc: 0.8911
 </code>
 </pre>
 </div>
@@ -1475,8 +1472,8 @@ Epoch 18: 100%|██████████| 329/329 [00:00&lt;00:00, 329.77it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 19: 100%|██████████| 1860/1860 [00:11&lt;00:00, 158.52it/s]
-Epoch 19: 100%|██████████| 329/329 [00:00&lt;00:00, 353.67it/s]
+<code>Epoch 19: 100%|██████████| 1860/1860 [00:11&lt;00:00, 158.81it/s]
+Epoch 19: 100%|██████████| 329/329 [00:00&lt;00:00, 338.22it/s]
 </code>
 </pre>
 </div>
@@ -1484,7 +1481,7 @@ Epoch 19: 100%|██████████| 329/329 [00:00&lt;00:00, 353.67it
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 019, Train loss: 11.7360, Test loss: 10.5768, Train Acc: 0.8812, Test Acc: 0.8919
+<code>Epoch 019, Train loss: 12.7353, Test loss: 10.6568, Train Acc: 0.8742, Test Acc: 0.8939
 </code>
 </pre>
 </div>
@@ -1492,16 +1489,16 @@ Epoch 19: 100%|██████████| 329/329 [00:00&lt;00:00, 353.67it
 <div class="output_area">
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>
-<code>Epoch 20: 100%|██████████| 1860/1860 [00:11&lt;00:00, 160.13it/s]
-Epoch 20: 100%|██████████| 329/329 [00:00&lt;00:00, 348.17it/s]</code>
+<code>Epoch 20: 100%|██████████| 1860/1860 [00:11&lt;00:00, 160.23it/s]
+Epoch 20: 100%|██████████| 329/329 [00:00&lt;00:00, 334.06it/s]</code>
 </pre>
 </div>
 </div>
 <div class="output_area">
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-<code>Epoch 020, Train loss: 11.5983, Test loss: 11.2500, Train Acc: 0.8827, Test Acc: 0.8883
-Best test accuracy: 0.8953
+<code>Epoch 020, Train loss: 12.4257, Test loss: 10.9089, Train Acc: 0.8754, Test Acc: 0.8928
+Best test accuracy: 0.8939
 </code>
 </pre>
 </div>
