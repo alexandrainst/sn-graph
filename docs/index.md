@@ -2,19 +2,30 @@
 
 ![Animation of adding spheres to the graph](https://raw.githubusercontent.com/alexandrainst/sn-graph/7-make-nice-docs/assets/horse_animation.gif)
 
-## What is Sphere Node Graph?
+## What is SN-Graph?
 
-`sn-graph` is a Python library containing an implementation of the SN-Graph algorithm.
+`sn-graph` is a Python library implementing the SN-Graph (Sphere Node Graph) algorithm for graph skeletonization. This algorithm converts 2D/3D shapes into lightweight, 1-dimensional graph skeletons while preserving their rough geometric structure.
 
-The SN-Graph is a `graph skeletonisation algorithm`, that is, an algorithm that takes a 2D/3D shape (e.g., a volume) and computes a graph skeleton of that shape. The skeleton is a lightweight, 1-dimensional representation that preserves the rough geometric structure of the shape. As such, it can be used for further processing, and various ML tasks, such as classification, regression, etc.
+The library provides:
 
-The goal of `sn-graph` is to provide the first Python implementation of the algorithm, together with functions to easily visualize the effect either as a volume (numpy array) or as an interactive 3D scene via trimesh.
+  - The first Python implementation of the SN-Graph algorithm
+  - Visualization tools for both volumetric (numpy array) representations and interactive 3D scene visualization via trimesh
+
 
 ## About the algorithm
 
-The algorithm was introduced in the article *SN-Graph: a Minimalist 3D Object Representation for Classification* [arXiv:2105.14784](https://arxiv.org/abs/2105.14784).
-The algorithm takes as an input a binary (or a monochromatic) image/volume, where 0 values represent the boundary contour of the object. It consists of the following three steps:
+Originally introduced in [SN-Graph: a Minimalist 3D Object Representation for Classification](https://arxiv.org/abs/2105.14784), the algorithm processes binary/monochromatic images or volumes through three steps:
 
-  - compute the Signed Distance Field (SDF) of the contour
-  - add vertices, seen as centers of spheres inscribed in the image (one uses SDF to query coordinates for the spheres' radii). The order of adding spheres is a minimax-style queue, where one balances maximizing the distances between the points (like in Furthest Point Sampling), and the size of the added spheres. **The strength of this approach lies in the fact that even with few vertices, it describes the shape well.**
-  - add edges between the spheres. Edges are added between the chosen vertices based on a couple of criteria, such as an edge has to be mostly contained within the shape, or an edge should not cross any spheres other than its endpoints.
+1. Compute the Signed Distance Field (SDF) of the object contour
+2. Add vertices (sphere centers) within the shape using a minimax-style queue that balances distances bewteen the spheres and spheres radii
+3. Create edges between vertices based on criteria such as containment within the shape
+
+## Why SN-Graph?
+
+SN-Graph offers several advantages over traditional skeletonization methods:
+
+- **Efficient representation:** With few vertices, SN-Graph captures the essential structure of complex shapes.
+- **Highly customizable:** The algorithm provides multiple parameters to fine-tune the skeleton generation process according to specific requirements.
+- **Abstract graph output:** Unlike classical skeletonization approaches that produce pixel-based segmentations, SN-Graph generates an abstract graph representation, making it directly amenable to e.g. Graph Machine Learning algorithms
+
+See the [Installation and basic usage](installation.md) section to begin using SN-Graph.
