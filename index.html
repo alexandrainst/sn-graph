@@ -234,9 +234,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-sphere-node-graph" class="md-nav__link">
+  <a href="#what-is-sn-graph" class="md-nav__link">
     <span class="md-ellipsis">
-      What is Sphere Node Graph?
+      What is SN-Graph?
     </span>
   </a>
   
@@ -245,7 +245,16 @@
         <li class="md-nav__item">
   <a href="#about-the-algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      About the algorithm
+      About the Algorithm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-sn-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why SN-Graph?
     </span>
   </a>
   
@@ -467,9 +476,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-sphere-node-graph" class="md-nav__link">
+  <a href="#what-is-sn-graph" class="md-nav__link">
     <span class="md-ellipsis">
-      What is Sphere Node Graph?
+      What is SN-Graph?
     </span>
   </a>
   
@@ -478,7 +487,16 @@
         <li class="md-nav__item">
   <a href="#about-the-algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      About the algorithm
+      About the Algorithm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-sn-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why SN-Graph?
     </span>
   </a>
   
@@ -505,18 +523,28 @@
 
 <h1 id="introduction">Introduction</h1>
 <p><img alt="Animation of adding spheres to the graph" src="https://raw.githubusercontent.com/alexandrainst/sn-graph/7-make-nice-docs/assets/horse_animation.gif" /></p>
-<h2 id="what-is-sphere-node-graph">What is Sphere Node Graph?</h2>
-<p><code>sn-graph</code> is a Python library containing an implementation of the SN-Graph algorithm.</p>
-<p>The SN-Graph is a <code>graph skeletonisation algorithm</code>, that is, an algorithm that takes a 2D/3D shape (e.g., a volume) and computes a graph skeleton of that shape. The skeleton is a lightweight, 1-dimensional representation that preserves the rough geometric structure of the shape. As such, it can be used for further processing, and various ML tasks, such as classification, regression, etc.</p>
-<p>The goal of <code>sn-graph</code> is to provide the first Python implementation of the algorithm, together with functions to easily visualize the effect either as a volume (numpy array) or as an interactive 3D scene via trimesh.</p>
-<h2 id="about-the-algorithm">About the algorithm</h2>
-<p>The algorithm was introduced in the article <em>SN-Graph: a Minimalist 3D Object Representation for Classification</em> <a href="https://arxiv.org/abs/2105.14784">arXiv:2105.14784</a>.
-The algorithm takes as an input a binary (or a monochromatic) image/volume, where 0 values represent the boundary contour of the object. It consists of the following three steps:</p>
+<h2 id="what-is-sn-graph">What is SN-Graph?</h2>
+<p><code>sn-graph</code> is a Python library implementing the SN-Graph (Sphere Node Graph) algorithm for graph skeletonization. This algorithm converts 2D/3D shapes into lightweight, 1-dimensional graph skeletons while preserving their rough geometric structure.</p>
+<p>The library provides:</p>
 <ul>
-<li>compute the Signed Distance Field (SDF) of the contour</li>
-<li>add vertices, seen as centers of spheres inscribed in the image (one uses SDF to query coordinates for the spheres' radii). The order of adding spheres is a minimax-style queue, where one balances maximizing the distances between the points (like in Furthest Point Sampling), and the size of the added spheres. <strong>The strength of this approach lies in the fact that even with few vertices, it describes the shape well.</strong></li>
-<li>add edges between the spheres. Edges are added between the chosen vertices based on a couple of criteria, such as an edge has to be mostly contained within the shape, or an edge should not cross any spheres other than its endpoints.</li>
+<li>The first Python implementation of the SN-Graph algorithm</li>
+<li>Visualization tools for both volumetric (numpy array) representations and interactive 3D scene visualization via trimesh</li>
 </ul>
+<h2 id="about-the-algorithm">About the Algorithm</h2>
+<p>Originally introduced in <a href="https://arxiv.org/abs/2105.14784">SN-Graph: a Minimalist 3D Object Representation for Classification</a>, the algorithm processes binary/monochromatic images or volumes through three steps:</p>
+<ol>
+<li>Compute the Signed Distance Field (SDF) of the object contour</li>
+<li>Add vertices (sphere centers) within the shape using a minimax-style queue that balances distances bewteen the spheres and spheres radii</li>
+<li>Create edges between vertices based on criteria such as containment within the shape</li>
+</ol>
+<h2 id="why-sn-graph">Why SN-Graph?</h2>
+<p>SN-Graph offers several advantages over traditional skeletonization methods:</p>
+<ol>
+<li><strong>Efficient representation:</strong> With few vertices, SN-Graph captures the essential structure of complex shapes.</li>
+<li><strong>Highly customizable:</strong> The algorithm provides multiple parameters to fine-tune the skeleton generation process according to specific requirements.</li>
+<li><strong>Abstract graph output:</strong> Unlike classical skeletonization approaches that produce pixel-based segmentations, SN-Graph generates an abstract graph representation, making it directly amenable to e.g. Graph Machine Learning</li>
+</ol>
+<p>See the installation section followed by the quickstart guide to begin using SN-Graph.</p>
 
 
 
