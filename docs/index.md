@@ -8,8 +8,8 @@
 
 The library provides:
 
-  - The first Python implementation of the SN-Graph algorithm
-  - Visualization tools for both volumetric (numpy array) representations and interactive 3D scene visualization via trimesh
+  - The Python implementation of the SN-Graph algorithm
+  - Visualization functions for both volumetric (numpy array) representations and interactive 3D scenes via trimesh
 
 
 ## About the algorithm
@@ -17,8 +17,8 @@ The library provides:
 Originally introduced in [SN-Graph: a Minimalist 3D Object Representation for Classification](https://arxiv.org/abs/2105.14784), the algorithm processes binary/monochromatic images or volumes through three steps:
 
 1. Compute the Signed Distance Field (SDF) of the object contour
-2. Add vertices (sphere centers) within the shape using a minimax-style queue that balances distances bewteen the spheres and spheres radii
-3. Create edges between vertices based on criteria such as containment within the shape
+2. Add vertices, seen as centers of spheres inscribed in the shape, where SDF is used to get the radii of the spheres. The order of adding spheres is a minimax-style queue that balances pairwise distances between the spheres and their radii
+3. Place edges between vertices based on criteria such as 'an edge has to be mostly contained within the shape', or 'an edge should not cross any spheres other than its endpoints'
 
 ## Why SN-Graph?
 

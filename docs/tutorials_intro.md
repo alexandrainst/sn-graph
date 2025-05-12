@@ -1,5 +1,5 @@
 
-These tutorial notebooks demonstrate key functionality  and examples of use of the library. The notebooks can be found in the [`notebooks/`](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/) directory of our GitHub repository.
+These tutorial notebooks demonstrate key functionality and examples of use of the library. The notebooks can be found in the [`notebooks/`](https://github.com/alexandrainst/sn-graph/blob/main/notebooks/) directory of our GitHub repository.
 
 ### [2D Demo](demo_sn-graph.ipynb)
 Basic 2D graphs creation and visualisation. Contains a comparison with other skeletonisation algorithms.
