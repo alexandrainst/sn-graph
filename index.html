@@ -527,22 +527,22 @@
 <p><code>sn-graph</code> is a Python library implementing the SN-Graph (Sphere Node Graph) algorithm for graph skeletonization. This algorithm converts 2D/3D shapes into lightweight, 1-dimensional graph skeletons while preserving their rough geometric structure.</p>
 <p>The library provides:</p>
 <ul>
-<li>The Python implementation of the SN-Graph algorithm</li>
-<li>Visualization functions for both volumetric (numpy array) representations and interactive 3D scenes via trimesh</li>
+<li>The Python implementation of the SN-Graph algorithm.</li>
+<li>Visualization functions for both volumetric (numpy array) representations and interactive 3D scenes via trimesh.</li>
 </ul>
 <h2 id="about-the-algorithm">About the algorithm</h2>
 <p>Originally introduced in <a href="https://arxiv.org/abs/2105.14784">SN-Graph: a Minimalist 3D Object Representation for Classification</a>, the algorithm processes binary/monochromatic images or volumes through three steps:</p>
 <ol>
-<li>Compute the Signed Distance Field (SDF) of the object contour</li>
-<li>Add vertices, seen as centers of spheres inscribed in the shape, where SDF is used to get the radii of the spheres. The order of adding spheres is a minimax-style queue that balances pairwise distances between the spheres and their radii</li>
-<li>Place edges between vertices based on criteria such as 'an edge has to be mostly contained within the shape', or 'an edge should not cross any spheres other than its endpoints'</li>
+<li>Compute the Signed Distance Field (SDF) of the object contour.</li>
+<li>Add vertices, seen as centers of spheres inscribed in the shape, where SDF is used to get the radii of the spheres. The order of adding spheres is a minimax-style queue that balances pairwise distances between the spheres and their radii.</li>
+<li>Place edges between vertices based on criteria such as 'an edge has to be mostly contained within the shape', or 'an edge should not cross any spheres other than its endpoints'.</li>
 </ol>
 <h2 id="why-sn-graph">Why SN-Graph?</h2>
 <p>SN-Graph offers several advantages over traditional skeletonization methods:</p>
 <ul>
 <li><strong>Efficient representation:</strong> With few vertices, SN-Graph captures the essential structure of complex shapes.</li>
 <li><strong>Highly customizable:</strong> The algorithm provides multiple parameters to fine-tune the skeleton generation process according to specific requirements.</li>
-<li><strong>Abstract graph output:</strong> Unlike classical skeletonization approaches that produce pixel-based segmentations, SN-Graph generates an abstract graph representation, making it directly amenable to e.g. Graph Machine Learning algorithms</li>
+<li><strong>Abstract graph output:</strong> Unlike classical skeletonization approaches that produce pixel-based segmentations, SN-Graph generates an abstract graph representation, making it directly amenable to e.g. Graph Machine Learning algorithms.</li>
 </ul>
 <p>See the <a href="installation/">Installation and basic usage</a> section to begin using SN-Graph.</p>
 
