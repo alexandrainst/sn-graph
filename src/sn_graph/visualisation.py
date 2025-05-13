@@ -62,7 +62,7 @@ def draw_sn_graph(
 
     # Draw spheres
     for center in spheres_centres:
-        radius = int(np.ceil(sdf_array[center]))
+        radius = sdf_array[center]
         center_array = np.array(center)
         sphere_coords = generate_sphere_surface(center_array, radius, sdf_array.shape)
 
@@ -71,7 +71,7 @@ def draw_sn_graph(
     return img
 
 
-def generate_sphere_surface(center: np.ndarray, radius: int, shape: tuple) -> tuple:
+def generate_sphere_surface(center: np.ndarray, radius: float, shape: tuple) -> tuple:
     """
     Generate coordinates of a sphere surface efficiently.
 
