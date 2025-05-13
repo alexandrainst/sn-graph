@@ -703,7 +703,7 @@ Defaults to False.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>tuple</code></td>            <td>
-                  <code><span title="typing.Union">Union</span>[<span title="typing.Tuple">Tuple</span>[<span title="list">list</span>, <span title="list">list</span>, <span title="numpy.ndarray">ndarray</span>], <span title="typing.Tuple">Tuple</span>[<span title="list">list</span>, <span title="list">list</span>]]</code>
+                  <code><span title="typing.Union">Union</span>[<span title="typing.Tuple">Tuple</span>[<span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, ...]], <span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, ...], ...]], <span title="numpy.ndarray">ndarray</span>], <span title="typing.Tuple">Tuple</span>[<span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, ...]], <span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, ...], ...]]]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -787,7 +787,12 @@ Defaults to False.</p>
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_sn_graph</span><span class="p">(</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_sn_graph</span><span class="p">(</span>
     <span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">max_num_vertices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">edge_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -795,7 +800,10 @@ Defaults to False.</p>
     <span class="n">minimal_sphere_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
     <span class="n">edge_sphere_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">return_sdf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]]],</span>
+<span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.</span>
 
 <span class="sd">    This function converts a grayscale (or binary) image/volume into a graph representation by first computing its signed distance field (assuming boundary contour has value 0), then placing sphere</span>
@@ -854,6 +862,8 @@ Defaults to False.</p>
         <span class="n">edge_threshold</span><span class="p">,</span>
         <span class="n">edge_sphere_threshold</span><span class="p">,</span>
     <span class="p">)</span>
+
+    <span class="n">spheres_centres</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">_standardize_output</span><span class="p">(</span><span class="n">spheres_centres</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_sdf</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">spheres_centres</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">sdf_array</span>
