@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, Tuple, Union
+from typing import Any, Tuple, Union, List
 
 import numpy as np
 import skfmm
@@ -14,7 +14,10 @@ def create_sn_graph(
     minimal_sphere_radius: float = 5.0,
     edge_sphere_threshold: float = 1.0,
     return_sdf: bool = False,
-) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
+) -> Union[
+    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], ...]], np.ndarray],
+    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], ...]]],
+]:
     """Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.
 
     This function converts a grayscale (or binary) image/volume into a graph representation by first computing its signed distance field (assuming boundary contour has value 0), then placing sphere
@@ -74,9 +77,22 @@ def create_sn_graph(
         edge_sphere_threshold,
     )
 
+    spheres_centres, edges = _standardize_output(spheres_centres, edges)
+
     if return_sdf:
         return spheres_centres, edges, sdf_array
     return spheres_centres, edges
+
+
+def _standardize_output(centers: list, edges: list) -> tuple:
+    "Standardize the output to ensure that all coordinates are tuples of integers, and all edges are tuples of coordinates."
+
+    standard_centers = [tuple(int(coord) for coord in center) for center in centers]
+    standard_edges = [
+        tuple(tuple(int(coord) for coord in row) for row in edge) for edge in edges
+    ]
+
+    return standard_centers, standard_edges
 
 
 def _validate_args(
