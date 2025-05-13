@@ -58,7 +58,7 @@ def create_sn_graph(
         return_sdf,
     )
 
-    # Pad the image with 1's to avoid edge effects in the signed distance field computation
+    # Pad the image with 0's to avoid edge effects in the signed distance field computation
     padded_image = np.pad(image, 1)
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
     # Remove padding
