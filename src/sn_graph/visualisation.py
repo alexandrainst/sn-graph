@@ -77,7 +77,7 @@ def generate_sphere_surface(center: np.ndarray, radius: float, shape: tuple) -> 
 
     Args:
         center: np.ndarray, center coordinates of the sphere
-        radius: int, radius of the sphere
+        radius: float, radius of the sphere
         shape: tuple, shape of the target array
 
     Returns:
