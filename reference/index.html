@@ -1126,7 +1126,7 @@ Value 0 is given to the background, value 1 to the background image/volume, valu
 
     <span class="c1"># Draw spheres</span>
     <span class="k">for</span> <span class="n">center</span> <span class="ow">in</span> <span class="n">spheres_centres</span><span class="p">:</span>
-        <span class="n">radius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sdf_array</span><span class="p">[</span><span class="n">center</span><span class="p">]))</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">sdf_array</span><span class="p">[</span><span class="n">center</span><span class="p">]</span>
         <span class="n">center_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
         <span class="n">sphere_coords</span> <span class="o">=</span> <span class="n">generate_sphere_surface</span><span class="p">(</span><span class="n">center_array</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">sdf_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
