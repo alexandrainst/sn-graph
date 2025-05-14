@@ -12,16 +12,20 @@ def draw_sn_graph(
     background_image: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """
-    Draw a graph of spheres and edges on an image/volume.
+    Draw a graph of spheres and edges on an image/volume (or on a blank background). The function creates a monochromatic volume of dimension equal to the dimension of the graph.
+    Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.
 
     Args:
-        spheres_centres: list of tuples, each tuple contains coordinates of a sphere's centre.
-        edges: list of tuples of tuples, each tuple contains coordinates of the two ends of an edge.
-        sdf_array: optional(np.ndarray), the signed distance function array, if not provided no spheres will be drawn
-        background_image: optional(np.ndarray), the image/volume on which to draw the graph
+        spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
+        edges (list): list of tuples of tuples, each tuple contains coordinates of the two endpoints of an edge.
+        sdf_array (optional(np.ndarray) ): the signed distance field array, if not provided no spheres will be drawn.
+        background_image (optional(np.ndarray) ): the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.
 
     Returns:
-        np.ndarray: the image/volume (or blank background) with the graph drawn on it.
+        (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.
+
+    Raises:
+        ValueError: if the shape of `sdf_array` is not equal to the shape of `background_image`.
     """
 
     # Check dimensions consistency
@@ -58,7 +62,7 @@ def draw_sn_graph(
 
     # Draw spheres
     for center in spheres_centres:
-        radius = int(np.ceil(sdf_array[center]))
+        radius = sdf_array[center]
         center_array = np.array(center)
         sphere_coords = generate_sphere_surface(center_array, radius, sdf_array.shape)
 
@@ -67,13 +71,13 @@ def draw_sn_graph(
     return img
 
 
-def generate_sphere_surface(center: np.ndarray, radius: int, shape: tuple) -> tuple:
+def generate_sphere_surface(center: np.ndarray, radius: float, shape: tuple) -> tuple:
     """
     Generate coordinates of a sphere surface efficiently.
 
     Args:
         center: np.ndarray, center coordinates of the sphere
-        radius: int, radius of the sphere
+        radius: float, radius of the sphere
         shape: tuple, shape of the target array
 
     Returns:
@@ -114,18 +118,28 @@ def visualize_3d_graph(
     spheres_centres: list, edges: list, sdf_array: Optional[np.ndarray] = None
 ) -> trimesh.scene.scene.Scene:
     """
-    Visualize a graph with vertices, edges, and spheres by creating a trimesh scene object.
+    Visualize a 3D graph with vertices, edges, and spheres by creating a trimesh scene object.
 
     Args:
-        spheres_centres : list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
-        edges : list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
-        sdf_array : array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
+        spheres_centres (list): list of coordinate tuples [(x1,y1,z1), (x2,y2,z2), ...]
+        edges (list ): list of tuples of coordinates for start and end of edges [((x1,y1,z1), (x2,y2,z2)), ...]
+        sdf_array (optional(np.ndarray) ): array that can be queried at vertex coordinates to get radius, if not provided, no spheres will be drawn
 
     Returns:
-
-    scene : trimesh.Scene
-        A 3D scene containing the graph visualization.
+        scene (trimesh.Scene): A 3D scene containing the graph visualization.
     """
+
+    if spheres_centres and (len(spheres_centres[0]) != 3):
+        raise ValueError("Expected 3D coordinates (x,y,z) for vertices.")
+
+    if edges and (len(edges[0][0]) != 3 or len(edges[0][1]) != 3):
+        raise ValueError("Expected 3D coordinates (x,y,z) for edge endpoints.")
+
+    if sdf_array is not None and sdf_array.ndim != 3:
+        raise ValueError(
+            f"SDF array must be 3-dimensional. Found {sdf_array.ndim} dimensions."
+        )
+
     # Create a scene
     scene = trimesh.Scene()
 

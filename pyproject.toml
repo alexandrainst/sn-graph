@@ -6,7 +6,7 @@ authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/alexandrainst/sn-graph"
-homepage = "https://github.com/alexandrainst/sn-graph"
+homepage = "https://alexandrainst.github.io/sn-graph"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -38,6 +38,10 @@ pooch = "^1.8.2"
 trimesh = "^4.6.4"
 rtree = "^1.4.0"
 coverage-badge = "^1.1.2"
+mkdocs = "^1.6.1"
+mkdocstrings = {extras = ["python"], version = "^0.29.1"}
+mkdocs-material = "^9.6.12"
+mknotebooks = "^0.8.0"
 
 
 

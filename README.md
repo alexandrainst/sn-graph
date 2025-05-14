@@ -29,6 +29,12 @@ Given a binary image/volume representing a shape, SN-Graph works by:
 
 The resulting graph serves as a lightweight 1-dimensional representation of the original image, potentially useful for further analysis.
 
+## Documentation
+
+For documentation see [docs](https://alexandrainst.github.io/sn-graph/).
+
+For API reference see [api_reference](https://alexandrainst.github.io/sn-graph/reference).
+
 ## Installation
 
 ```bash
@@ -76,7 +82,7 @@ plt.show()
 - `max_edge_length`: Maximum allowed edge length
 - `edge_threshold`: Threshold for determining what portion of an edge must be contained within the shape
 - `minimal_sphere_radius`: Minimum radius allowed for spheres
-- `edge_sphere_threshold`: Threshold value for deciding how close can an edge be to a non-enpdpoint spheres
+- `edge_sphere_threshold`: Threshold value for deciding how close can an edge be to non-enpdpoint spheres
 - `return_sdf`: Whether to return signed distance field array computed by the algorithm (neccessary to extract radii of spheres)
 
 ## Authors

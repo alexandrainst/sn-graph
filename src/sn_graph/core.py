@@ -1,6 +1,5 @@
-import time
 import warnings
-from typing import Any, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import numpy as np
 import skfmm
@@ -15,44 +14,31 @@ def create_sn_graph(
     minimal_sphere_radius: float = 5.0,
     edge_sphere_threshold: float = 1.0,
     return_sdf: bool = False,
-) -> Union[Tuple[list, list, np.ndarray], Tuple[list, list]]:
+) -> Union[
+    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], ...]], np.ndarray],
+    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], ...]]],
+]:
     """Create a graph from an image/volume using the Sphere-Node (SN) graph skeletonisation algorithm.
 
-    This function converts a grayscale image/volume into a graph representation by first computing
-    its signed distance field (assuming boundary contour has value 0), then placing sphere centers as vertices and creating edges between neighboring spheres based on specified criteria.
+    This function converts a grayscale (or binary) image/volume into a graph representation by first computing its signed distance field (assuming boundary contour has value 0), then placing sphere
+    centers as vertices and creating edges between neighboring spheres based on specified criteria.
 
-    Parameters
-    ----------
-    image : np.ndarray
-        Grayscale input image/volume where foreground is positive and background is 0.
-        Can be a 2D or 3D numpy array.
-    max_num_vertices : int, optional
-        Maximum number of vertices (sphere centers) to generate.
-        If -1, no limit is applied.
-        Default is -1.
-    edge_threshold : float, optional
-        Threshold value for determining what is the minimal portion of an edge that has to lie within the object.
-        Higher value is more restrictive, with 1 requiring edge to be fully contained in the object.
-        Default is 1.0.
-    max_edge_length : int, optional
-        Maximum allowed length for edges between vertices.
-        If -1, no limit is applied. Default is -1.
-    minimal_sphere_radius : float, optional
-        Minimum radius allowed for spheres when placing vertices.
-        Default is 5
-    edge_sphere_threshold: float, optional
-        Threshold value for deciding how close can edge be to a non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever.
-        Default is 1.0
-    return_sdf : bool, optional
-        If True, the signed distance field array is returned as well.
-        Default is False
+    Args:
+        image (np.ndarray): Input image/volume where the foreground is positive and the background is 0.
+            Can be a numpy array of arbitrary dimension.
+        max_num_vertices (int, optional): Maximum number of vertices (sphere centers) to generate.
+            If -1, no limit is applied. Defaults to -1.
+        edge_threshold (float, optional): Threshold value for determining the minimal portion of an edge that must lie within the object. Higher value is more restrictive, with 1 requiring edge to be fully contained in the object. Defaults to 1.0.
+        max_edge_length (int, optional): Maximum allowed length for edges between vertices.
+            If -1, no limit is applied. Defaults to -1.
+        minimal_sphere_radius (float, optional): Minimum radius allowed for spheres when placing vertices.
+            Defaults to 5.
+        edge_sphere_threshold (float, optional): Threshold value for determining the minimum allowable distance between an edge and non-endpoint spheres. Higher value is more restrictive, with 1 allowing no overlap whatsoever. Defaults to 1.0.
+        return_sdf (bool, optional): If True, the signed distance field array is returned as well.
+            Defaults to False.
 
-    Returns
-    -------
-    Tuple[List[Tuple[int, ...]], List[Tuple[Tuple[int, ...], Tuple[int, ...]]]]
-        A tuple containing:
-        - List of sphere centers as coordinate tuples
-        - List of edges as pairs of vertex coordinates
+    Returns:
+        tuple: A tuple containing a list of sphere centers as coordinate tuples, a list of edges as pairs of vertex coordinates, and a signed distance field array if return_sdf is True.
     """
     (
         image,
@@ -72,31 +58,16 @@ def create_sn_graph(
         return_sdf,
     )
 
-    print("Computing SDF array...")
-    start = time.time()
-
-    # Pad the image with 1's to avoid edge effects in the signed distance field computation
+    # Pad the image with 0's to avoid edge effects in the signed distance field computation
     padded_image = np.pad(image, 1)
     padded_sdf_array = skfmm.distance(padded_image, dx=1, periodic=False)
     # Remove padding
     slice_tuple = tuple(slice(1, -1) for _ in range(image.ndim))
     sdf_array = padded_sdf_array[slice_tuple]
 
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
-
-    print("Computing sphere centres...")
-    start = time.time()
-
     spheres_centres = choose_sphere_centres(
         sdf_array, max_num_vertices, minimal_sphere_radius
     )
-
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
-
-    print("Computing edges...")
-    start = time.time()
 
     edges = determine_edges(
         spheres_centres,
@@ -105,12 +76,23 @@ def create_sn_graph(
         edge_threshold,
         edge_sphere_threshold,
     )
-    end = time.time()
-    print(f"Time taken: {end - start:.4f} seconds")
+
+    spheres_centres, edges = _standardize_output(spheres_centres, edges)
 
     if return_sdf:
         return spheres_centres, edges, sdf_array
     return spheres_centres, edges
+
+
+def _standardize_output(centers: list, edges: list) -> tuple:
+    "Standardize the output to ensure that all coordinates are tuples of integers, and all edges are tuples of coordinates."
+
+    standard_centers = [tuple(int(coord) for coord in center) for center in centers]
+    standard_edges = [
+        tuple(tuple(int(coord) for coord in row) for row in edge) for edge in edges
+    ]
+
+    return standard_centers, standard_edges
 
 
 def _validate_args(

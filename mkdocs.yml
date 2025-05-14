@@ -1,0 +1,20 @@
+site_name: SN-Graph
+
+theme:
+  name: "material"
+
+repo_url: https://github.com/alexandrainst/sn-graph
+
+plugins:
+  - mkdocstrings
+  - mknotebooks
+
+nav:
+- Introduction: index.md
+- Installation and basic usage: installation.md
+- API Reference: reference.md
+- Tutorials:
+  - Overview: tutorials_intro.md
+  - 2D Demo: demo_sn-graph.ipynb
+  - 3D Demo: 3D_demo.ipynb
+  - MNIST classification: mnist_classification.ipynb
