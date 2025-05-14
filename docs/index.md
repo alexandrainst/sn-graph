@@ -1,6 +1,6 @@
 # Introduction
 
-![Animation of adding spheres to the graph](https://raw.githubusercontent.com/alexandrainst/sn-graph/7-make-nice-docs/assets/horse_animation.gif)
+![Animation of adding spheres to the graph](https://raw.githubusercontent.com/alexandrainst/sn-graph/main/assets/horse_animation.gif)
 
 ## What is SN-Graph?
 
