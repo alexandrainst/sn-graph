@@ -844,7 +844,7 @@ Defaults to False.</p>
         <span class="n">return_sdf</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># Pad the image with 1&#39;s to avoid edge effects in the signed distance field computation</span>
+    <span class="c1"># Pad the image with 0&#39;s to avoid edge effects in the signed distance field computation</span>
     <span class="n">padded_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">padded_sdf_array</span> <span class="o">=</span> <span class="n">skfmm</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">padded_image</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="c1"># Remove padding</span>
