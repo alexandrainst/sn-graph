@@ -1,7 +1,7 @@
-import pytest
 from typing import Optional, Union
 
 import numpy as np
+import pytest
 
 import sn_graph as sn
 
