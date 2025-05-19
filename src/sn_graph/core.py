@@ -167,11 +167,6 @@ def _validate_args(
             f"edge_sphere_threshold must be positive, got {edge_sphere_threshold}"
         )
 
-    # This check is redundant after the isinstance(return_sdf, bool) check above
-    # but keeping a similar pattern to the original code
-    if return_sdf not in [True, False]:
-        raise ValueError(f"return_sdf must be a boolean, got {return_sdf}")
-
     return (
         image,
         max_num_vertices,
