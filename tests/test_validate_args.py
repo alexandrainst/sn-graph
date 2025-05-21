@@ -112,7 +112,6 @@ def test_high_dimension_warning(valid_params: dict) -> None:
     params = valid_params.copy()
     params["image"] = np.ones((5, 5, 5, 5))  # 4D array
 
-    # Only check that a RuntimeWarning is raised, without matching the message
     with pytest.warns(
         RuntimeWarning,
         match=f"Running algorithm on an input of high dimension. Input dimension: {params['image'].ndim}",
