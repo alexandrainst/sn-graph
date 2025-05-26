@@ -85,7 +85,7 @@ def test_next_sphere_is_chosen_correctly_and_candidates_are_updated(
     )
     assert (
         next_sphere == expected_sphere
-    ), "The next sphere should be the one with the maximum distance from the current spheres, givven they all have the same radius"
+    ), "The next sphere should be the one with the maximum distance from the current spheres, given they all have the same radius"
     assert (
         new_candidates == expected_candidates
     ).all(), "The new candidates mask should be the same as the expected ones"
