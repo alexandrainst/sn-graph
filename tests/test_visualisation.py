@@ -93,3 +93,20 @@ def test_visualize_3d_graph_on_k3_graph(return_sdf: bool,
 
     assert isinstance(scene, trimesh.Scene)
     assert len(scene.geometry) == expected_geometry_count, f"Scene should have {expected_geometry_count} geometries when return_sdf is {return_sdf}"
+
+@pytest.mark.parametrize(
+    ("spheres_centres", "edges", "sdf_array", "expected_error"),
+    [
+        ([(1,1),(2,2)], [((1,1,1),(2,2,2))], np.ones((10,10,10)), "Expected 3D coordinates.*vertices"),
+        ([(1,1,1),(2,2,2)], [((1,1),(2,2))], np.ones((10,10,10)), "Expected 3D coordinates.*edge endpoints"),
+        ([(1,1,1),(2,2,2)], [((1,1,1),(2,2,2))], np.ones((10,10,10,10)), "SDF array must be 3-dimensional"),
+    ],
+) # type: ignore[misc]
+def test_visualise_3d_graph_fails_for_non_3d_inputs(
+    spheres_centres: list,
+    edges: list,
+    sdf_array: np.ndarray,
+    expected_error: str
+) -> None:
+    with pytest.raises(ValueError, match=expected_error):
+        sn.visualize_3d_graph(spheres_centres, edges, sdf_array)
