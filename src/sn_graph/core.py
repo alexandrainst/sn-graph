@@ -482,7 +482,7 @@ def determine_edges(
     edge_lengths = np.linalg.norm(edges[:, 1] - edges[:, 0], axis=1)
 
     # Filter by length
-    length_mask = edge_lengths < max_edge_length
+    length_mask = edge_lengths <= max_edge_length
     edges = edges[length_mask]
 
     # Filter by being within object
