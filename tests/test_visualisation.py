@@ -122,12 +122,12 @@ def test_visualise_3d_graph_fails_for_non_3d_inputs(
     ]
 
 ) # type: ignore[misc]
-def test_generate_sphere_surface_returns_correct_amount_of_cooridnates(center: np.ndarray, radius: float, shape: tuple, expected_no_coordinates: int) -> None:
+def test_generate_sphere_surface_returns_correct_amount_of_coordinates(center: np.ndarray, radius: float, shape: tuple, expected_no_coordinates: int) -> None:
 
     sphere_surface_coordinates=sn.visualisation.generate_sphere_surface(center, radius, shape)
-    print(sphere_surface_coordinates)
+
     assert isinstance(sphere_surface_coordinates, tuple), "Sphere coordinates should be a tuple"
 
     assert len(sphere_surface_coordinates)==len(shape), "The tuple should always contain as many arrays as there are dimensions, one array per dimension, even if empty"
 
-    assert len(sphere_surface_coordinates[0])==expected_no_coordinates, f"There should be {expected_no_coordinates} different points on the sphere."
+    assert len(sphere_surface_coordinates[0])==expected_no_coordinates, f"There should be {expected_no_coordinates} different points on the sphere"
