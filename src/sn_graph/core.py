@@ -167,11 +167,6 @@ def _validate_args(
             f"edge_sphere_threshold must be positive, got {edge_sphere_threshold}"
         )
 
-    # This check is redundant after the isinstance(return_sdf, bool) check above
-    # but keeping a similar pattern to the original code
-    if return_sdf not in [True, False]:
-        raise ValueError(f"return_sdf must be a boolean, got {return_sdf}")
-
     return (
         image,
         max_num_vertices,
@@ -487,7 +482,7 @@ def determine_edges(
     edge_lengths = np.linalg.norm(edges[:, 1] - edges[:, 0], axis=1)
 
     # Filter by length
-    length_mask = edge_lengths < max_edge_length
+    length_mask = edge_lengths <= max_edge_length
     edges = edges[length_mask]
 
     # Filter by being within object

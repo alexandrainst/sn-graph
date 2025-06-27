@@ -93,3 +93,41 @@ def test_visualize_3d_graph_on_k3_graph(return_sdf: bool,
 
     assert isinstance(scene, trimesh.Scene)
     assert len(scene.geometry) == expected_geometry_count, f"Scene should have {expected_geometry_count} geometries when return_sdf is {return_sdf}"
+
+@pytest.mark.parametrize(
+    ("spheres_centres", "edges", "sdf_array", "expected_error"),
+    [
+        ([(1,1),(2,2)], [((1,1,1),(2,2,2))], np.ones((10,10,10)), "Expected 3D coordinates.*vertices"),
+        ([(1,1,1),(2,2,2)], [((1,1),(2,2))], np.ones((10,10,10)), "Expected 3D coordinates.*edge endpoints"),
+        ([(1,1,1),(2,2,2)], [((1,1,1),(2,2,2))], np.ones((10,10,10,10)), "SDF array must be 3-dimensional"),
+    ],
+) # type: ignore[misc]
+def test_visualise_3d_graph_fails_for_non_3d_inputs(
+    spheres_centres: list,
+    edges: list,
+    sdf_array: np.ndarray,
+    expected_error: str
+) -> None:
+    with pytest.raises(ValueError, match=expected_error):
+        sn.visualize_3d_graph(spheres_centres, edges, sdf_array)
+
+
+@pytest.mark.parametrize(
+    ("center", "radius", "shape", "expected_no_coordinates"),
+    [
+        (np.array([1,1,1]), 1, (1,1,1), 0), # corner case where there is no coordinates to return as the shape of the volume is smaller then the center of a sphere. Unlikely to happen but whatever
+        (np.array([1,1,1]), 0, (10,10,10), 1), # with radius 0 we expect only one coordinate, namely the center
+        (np.array([1,1]), 1, (10,10), 8), # There is 8 squares around (1,1) where distance is at most 1 (and greater than the hard coded surface threshold 0.5)
+
+    ]
+
+) # type: ignore[misc]
+def test_generate_sphere_surface_returns_correct_amount_of_coordinates(center: np.ndarray, radius: float, shape: tuple, expected_no_coordinates: int) -> None:
+
+    sphere_surface_coordinates=sn.visualisation.generate_sphere_surface(center, radius, shape)
+
+    assert isinstance(sphere_surface_coordinates, tuple), "Sphere coordinates should be a tuple"
+
+    assert len(sphere_surface_coordinates)==len(shape), "The tuple should always contain as many arrays as there are dimensions, one array per dimension, even if empty"
+
+    assert len(sphere_surface_coordinates[0])==expected_no_coordinates, f"There should be {expected_no_coordinates} different points on the sphere"
