@@ -29,6 +29,7 @@ jobs:
             libblas-dev \
             liblapack-dev \
             gfortran
+      - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           version: 1.8.3
