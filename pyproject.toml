@@ -8,12 +8,13 @@ readme = "README.md"
 repository = "https://github.com/alexandrainst/sn-graph"
 homepage = "https://alexandrainst.github.io/sn-graph"
 
+
 [tool.poetry.dependencies]
 python = "^3.11"
 numpy = "2.0"
 matplotlib = "^3.9.3"
+scikit-fmm = "^2025.6.23"
 scikit-image = "^0.24.0"
-scikit-fmm = "^2024.9.16"
 trimesh = "^4.6.8"
 
 
@@ -94,10 +95,6 @@ exclude_lines = [
     "raise ImportError",
 ]
 ignore_errors = true
-
-
-
-
 
 
 [build-system]
