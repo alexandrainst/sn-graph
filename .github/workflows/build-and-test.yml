@@ -9,7 +9,19 @@ on:
 
 jobs:
   build-and-test:
+    name: python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    # 3.14 is exploratory: scikit-fmm publishes no cp314 wheel, so it must
+    # build from source there. Let it report without failing the workflow.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        experimental: [false]
+        include:
+          - python-version: "3.14"
+            experimental: true
     steps:
       - uses: actions/checkout@v3
         with:
@@ -18,7 +30,7 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -31,10 +43,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
+          # poetry.lock must be part of the key, otherwise a changed lock
+          # restores a stale venv and the install step is skipped.
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction #--no-root
+        run: poetry install --no-interaction
       - name: Lint project
         run: poetry run black --check . && poetry run isort -c .
       - name: Test project
