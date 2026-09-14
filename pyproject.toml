@@ -1,6 +1,8 @@
 [tool.poetry]
 name = "sn-graph"
-version = "0.3.0"
+# Placeholder only. The real version is derived from the git tag at build
+# time by poetry-dynamic-versioning. See RELEASING.md.
+version = "0.0.0"
 description = "A Python implementation of SN-Graph algorithm."
 authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
 license = "MIT"
@@ -97,6 +99,11 @@ exclude_lines = [
 ignore_errors = true
 
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
