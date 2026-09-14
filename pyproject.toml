@@ -21,7 +21,7 @@ trimesh = "^4.6.8"
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.1.1"
 ipykernel = "^6.29.5"
-pytest = "^8.0.0"
+pytest = ">=8,<10"
 pytest-cov = "^4.1.0"
 black = "^24.3.0"
 isort = "^5.12.0"
