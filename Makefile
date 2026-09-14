@@ -5,8 +5,7 @@ TEST_REPORTS_DIR := $(CURDIR)/test-reports
 NOTEBOOKS_DIR := $(CURDIR)/notebooks
 
 activate:  ## Print the command to activate the virtual environment
-	@echo "Run this in your shell:"
-	@poetry env activate
+	@echo "source .venv/bin/activate"
 
 install:  # Install the app locally
 	@echo "Installing dependencies..."
