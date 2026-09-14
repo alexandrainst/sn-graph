@@ -27,10 +27,7 @@ git tag -l --sort=-v:refname       # full history
    `--draft` to create the Release without triggering anything, then publish it
    later with `gh release edit v0.4.0 --draft=false` or from the Releases page.
 
-   The tag does not need to exist: it is created for you, on the current tip of
-   `main` **on GitHub** - not your local checkout, which need not even be on
-   that branch - and arrives locally with your next `git pull`. Tag beforehand
-   only if you need to pin the release to some other commit.
+   The tag does not need to exist: it is created and arrives locally with your next `git pull`. Tag beforehand only if you need to pin the release to some other commit.
 
 The release notes are the project's changelog; there is no `CHANGELOG.md`.
 
