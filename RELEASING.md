@@ -1,61 +1,52 @@
 # Releasing
 
-The version is **not** stored in the repository. `pyproject.toml` deliberately
-carries `version = "0.0.0"` as a placeholder; the real version is derived from
-the git tag at build time by
-[poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning).
-The tag is the single source of truth.
+The version is not stored in the repository. `pyproject.toml` carries
+`version = "0.0.0"` as a placeholder; the real version is derived from the git
+tag at build time. The tag is the single source of truth.
 
-## Check the current version
+## Current version
 
 ```bash
 git describe --tags --abbrev=0     # latest release
-git tag -l --sort=-v:refname       # full history, newest first
+git tag -l --sort=-v:refname       # full history
 ```
 
 ## Cut a release
 
 1. Make sure `main` is green and contains everything you want to ship.
-2. Tag it, using a `v` prefix and semantic versioning:
+
+2. Tag it, with a `v` prefix and semantic versioning:
 
    ```bash
    git tag v0.4.0 && git push origin v0.4.0
    ```
 
-3. Create the GitHub Release. **Publishing the release is what publishes to
-   PyPI**, so draft it first if you want to take your time over the notes:
+   Pushing a tag runs no workflow. That is expected.
+
+3. Create the GitHub Release. Publishing it runs
+   `.github/workflows/release.yml`, which runs the tests, builds the
+   distributions, checks the built version matches the tag, and uploads to
+   PyPI.
 
    ```bash
-   gh release create v0.4.0 --draft --title "..." --notes "..."
+   gh release create v0.4.0 --title "..." --notes "..."
    ```
 
-   A draft triggers nothing. Publishing it runs `.github/workflows/release.yml`,
-   which runs the tests, builds the distributions, checks the built version
-   matches the tag, and uploads to PyPI.
+   Add `--draft` to write the notes now and publish later - a draft triggers
+   nothing. Skip it if you are happy to publish straight away.
 
-The release notes are the project's changelog - there is no `CHANGELOG.md`.
+The release notes are the project's changelog; there is no `CHANGELOG.md`.
 
-## Building locally
+## Local builds
 
-`python -m build` reads the git tag through the build backend and needs no
-extra setup. Plain `poetry build` will report `0.0.0` unless you install the
-plugin into Poetry itself:
+Between releases the version resolves to something like
+`0.3.0.post36.dev0+d534de8` - 36 commits past `v0.3.0`. That is normal.
 
-```bash
-poetry self add "poetry-dynamic-versioning[plugin]"
-```
+Poetry installs the versioning plugin itself on `poetry install`, declared in
+`[tool.poetry.requires-plugins]`. There is nothing to set up by hand.
 
-Between releases the derived version looks like `0.3.0.post35.dev0+a36c6ca`.
-That is expected - it means the commit is 35 commits past the `v0.3.0` tag.
+## Credentials
 
-## One-time setup
-
-PyPI publishing uses [Trusted
-Publishing](https://docs.pypi.org/trusted-publishers/), so no API token is
-stored in the repository. It requires, once:
-
-- On PyPI, under the project's *Publishing* settings, a GitHub publisher for
-  owner `alexandrainst`, repository `sn-graph`, workflow `release.yml`,
-  environment `pypi`.
-- In the repository settings, an environment named `pypi`. Adding a required
-  reviewer there gives a manual approval gate before anything is uploaded.
+PyPI publishing is configured outside this repository, so no token is stored
+here. If the publish step fails to authenticate, that configuration is what
+needs attention.
