@@ -28,20 +28,13 @@ git tag -l --sort=-v:refname       # full history
    later with `gh release edit v0.4.0 --draft=false` or from the Releases page.
 
    The tag does not need to exist: it is created for you, on the current tip of
-   `main`, and arrives locally with your next `git pull`. Tag beforehand only if
-   you need to pin the release to some other commit.
+   `main` **on GitHub** - not your local checkout, which need not even be on
+   that branch - and arrives locally with your next `git pull`. Tag beforehand
+   only if you need to pin the release to some other commit.
 
 The release notes are the project's changelog; there is no `CHANGELOG.md`.
 
 ## Credentials
 
 Publishing uses PyPI [Trusted
-Publishing](https://docs.pypi.org/trusted-publishers/), so no API token is
-stored in this repository - PyPI mints a short-lived credential from the
-workflow's own identity.
-
-It has to be set up once, by someone with owner rights on the PyPI project:
-add a GitHub publisher under the project's *Publishing* settings pointing at
-this repository and `release.yml`, and create the matching environment in the
-repository settings. Until that exists, the publish step will fail to
-authenticate while everything before it succeeds.
+Publishing](https://docs.pypi.org/trusted-publishers/).
