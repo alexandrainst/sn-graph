@@ -1,0 +1,4 @@
+[virtualenvs]
+# Keep the virtualenv in the project as .venv, matching what CI does.
+# Activation is then just `source .venv/bin/activate`.
+in-project = true
