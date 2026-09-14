@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  # Python dependencies (Poetry uses the "pip" ecosystem)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Roll routine minor/patch bumps into a single PR instead of one each.
+      python-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Keep the CI action versions current as well.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
