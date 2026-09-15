@@ -14,6 +14,7 @@ def draw_sn_graph(
     """
     Draw a graph of spheres and edges on an image/volume (or on a blank background). The function creates a monochromatic volume of dimension equal to the dimension of the graph.
     Value 0 is given to the background, value 1 to the background image/volume, value 2 to the edges, and value 4 to the spheres.
+    Singleton axes in the SDF and background are squeezed before drawing.
 
     Args:
         spheres_centres (list): list of tuples, each tuple contains coordinates of a sphere's centre.
@@ -22,10 +23,10 @@ def draw_sn_graph(
         background_image (optional(np.ndarray) ): the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.
 
     Returns:
-        (np.ndarray): the image/volume (or a blank background) with the graph drawn on it.
+        (np.ndarray): the uint8 image/volume with the graph drawn on it.
 
     Raises:
-        ValueError: if the shape of `sdf_array` is not equal to the shape of `background_image`.
+        ValueError: if the shapes of `sdf_array` and `background_image` differ after squeezing.
     """
 
     if sdf_array is not None:
