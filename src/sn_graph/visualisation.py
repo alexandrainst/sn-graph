@@ -28,6 +28,11 @@ def draw_sn_graph(
         ValueError: if the shape of `sdf_array` is not equal to the shape of `background_image`.
     """
 
+    if sdf_array is not None:
+        sdf_array = np.squeeze(sdf_array)
+    if background_image is not None:
+        background_image = np.squeeze(background_image)
+
     # Check dimensions consistency
     if sdf_array is not None and background_image is not None:
         if sdf_array.shape != background_image.shape:
@@ -36,17 +41,17 @@ def draw_sn_graph(
             )
 
     if background_image is not None:
-        img = background_image.copy()
+        img = background_image.astype(np.uint8)
     elif sdf_array is not None:
-        img = np.zeros(sdf_array.shape)
+        img = np.zeros(sdf_array.shape, dtype=np.uint8)
     else:
         if not spheres_centres:
             # If no spheres and no background image, return an empty array
-            return np.array([])
+            return np.array([], dtype=np.uint8)
         else:
             # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
             shape = np.max(np.array(spheres_centres) + 10, axis=0)
-            img = np.zeros(shape)
+            img = np.zeros(shape, dtype=np.uint8)
 
     # Draw edges
     for edge in edges:
