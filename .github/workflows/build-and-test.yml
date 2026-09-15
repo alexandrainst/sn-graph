@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  python-tests:
     name: python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     # 3.14 is exploratory: scikit-fmm publishes no cp314 wheel, so it must
@@ -54,3 +54,16 @@ jobs:
         run: poetry run black --check . && poetry run isort -c .
       - name: Test project
         run: poetry run pytest .
+
+  build-and-test:
+    name: build-and-test
+    needs: python-tests
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix result
+        env:
+          MATRIX_RESULT: ${{ needs.python-tests.result }}
+        run: |
+          echo "Python test matrix: $MATRIX_RESULT"
+          test "$MATRIX_RESULT" = success
