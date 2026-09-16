@@ -43,7 +43,7 @@ def test_draw_handles_dtypes_and_singleton_axes(
     np.testing.assert_array_equal(result, expected)
     np.testing.assert_array_equal(background, original_background)
     np.testing.assert_array_equal(sdf, original_sdf)
-    assert result.dtype == np.uint8
+    assert result.dtype == int
     assert result.ndim == dim
     assert 2 in result
     if include_sdf:
@@ -69,11 +69,21 @@ def test_draw_accepts_background_with_singleton_axis(singleton_axis: int) -> Non
     np.testing.assert_array_equal(
         result, sn.draw_sn_graph(centres, edges, sdf, background_image=image)
     )
-    assert result.dtype == np.uint8
+    assert result.dtype == int
     assert {0, 1, 4}.issubset(np.unique(result))
 
 
-def test_draw_empty_graph_returns_uint8() -> None:
+def test_draw_normalizes_background_to_binary_integers() -> None:
+    background = np.array([[0.0, -2.0], [0.5, 255.0]])
+
+    result = sn.draw_sn_graph([], [], background_image=background)
+
+    np.testing.assert_array_equal(result, [[0, 1], [1, 1]])
+    assert result.dtype == int
+    np.testing.assert_array_equal(1 - result, [[1, 0], [0, 0]])
+
+
+def test_draw_empty_graph_returns_integer_array() -> None:
     result = sn.draw_sn_graph([], [])
     assert result.size == 0
-    assert result.dtype == np.uint8
+    assert result.dtype == int

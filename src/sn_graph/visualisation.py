@@ -23,7 +23,7 @@ def draw_sn_graph(
         background_image (optional(np.ndarray) ): the image/volume on which to draw the graph. If not provided and if sdf_array is not provided either, a blank background will be created with the size inferred from the coordinates of the graph vertices.
 
     Returns:
-        (np.ndarray): the uint8 image/volume with the graph drawn on it.
+        (np.ndarray): the integer image/volume with the graph drawn on it.
 
     Raises:
         ValueError: if the shapes of `sdf_array` and `background_image` differ after squeezing.
@@ -42,17 +42,17 @@ def draw_sn_graph(
             )
 
     if background_image is not None:
-        img = background_image.astype(np.uint8)
+        img = (background_image != 0).astype(int)
     elif sdf_array is not None:
-        img = np.zeros(sdf_array.shape, dtype=np.uint8)
+        img = np.zeros(sdf_array.shape, dtype=int)
     else:
         if not spheres_centres:
             # If no spheres and no background image, return an empty array
-            return np.array([], dtype=np.uint8)
+            return np.array([], dtype=int)
         else:
             # Create a blank image with shape based on the maximum coordinates of spheres, with an offset of 10 to give some room to breathe
             shape = np.max(np.array(spheres_centres) + 10, axis=0)
-            img = np.zeros(shape, dtype=np.uint8)
+            img = np.zeros(shape, dtype=int)
 
     # Draw edges
     for edge in edges:
