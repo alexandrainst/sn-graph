@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "sn-graph"
 # Placeholder only. The real version is derived from the git tag at build
-# time by poetry-dynamic-versioning. See RELEASING.md.
+# time by poetry-dynamic-versioning. See CONTRIBUTING.md.
 version = "0.0.0"
 description = "A Python implementation of SN-Graph algorithm."
 authors = ["Tomasz Prytula <tomasz.prytula@alexandra.dk>"]
