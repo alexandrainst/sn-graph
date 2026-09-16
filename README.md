@@ -35,6 +35,9 @@ For documentation see [docs](https://alexandrainst.github.io/sn-graph/).
 
 For API reference see [api_reference](https://alexandrainst.github.io/sn-graph/reference).
 
+Bug reports, improvements, and pull requests are welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+
 ## Installation
 
 ```bash

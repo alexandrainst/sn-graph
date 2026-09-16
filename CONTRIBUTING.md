@@ -1,17 +1,25 @@
-# Releasing
+# Contributing
+
+Bug reports, improvements, and pull requests are welcome. Open a GitHub issue
+to report a bug or suggest a change. If you already have a fix, open a pull
+request.
+
+## For maintainers
+
+### Releasing
 
 The version is not stored in the repository. `pyproject.toml` carries
 `version = "0.0.0"` as a placeholder; the real version is derived from the git
 tag at build time. The tag is the single source of truth.
 
-## Current version
+#### Current version
 
 ```bash
 git describe --tags --abbrev=0     # latest release
 git tag -l --sort=-v:refname       # full history
 ```
 
-## Prepare a release
+#### Prepare a release
 
 1. Make sure `main` is green and contains everything you want to ship.
 
@@ -31,7 +39,25 @@ git tag -l --sort=-v:refname       # full history
 
 The release notes are the project's changelog; there is no `CHANGELOG.md`.
 
-## Credentials
+#### Credentials
 
 Publishing uses PyPI [Trusted
 Publishing](https://docs.pypi.org/trusted-publishers/).
+
+### Documentation
+
+The notebooks need a Poetry environment with Jupyter installed. Set it up with:
+
+```bash
+make install
+```
+
+Then rebuild and deploy the documentation:
+
+```bash
+make mkdocs
+```
+
+This runs the tutorial notebooks, builds the MkDocs site, and deploys it to
+GitHub Pages. When it finishes, check the
+[published documentation](https://alexandrainst.github.io/sn-graph/).
