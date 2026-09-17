@@ -17,7 +17,7 @@ numpy = "^2.0"
 matplotlib = "^3.9.3"
 scikit-fmm = "^2025.6.23"
 scikit-image = ">=0.24,<1.0"
-trimesh = "^4.6.8"
+trimesh = ">=4.6.8,<6.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -38,7 +38,7 @@ pillow = ">=11.1,<13.0"
 torch = "^2.6.0"
 torch-geometric = "^2.6.1"
 pooch = "^1.8.2"
-trimesh = "^4.6.4"
+trimesh = ">=4.6.4,<6.0.0"
 rtree = "^1.4.0"
 coverage-badge = "^1.1.2"
 mkdocs = "^1.6.1"
